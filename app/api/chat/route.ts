@@ -22,18 +22,20 @@ export async function POST(req: Request) {
       }
     );
 
-    const text = await response.text();
+    const data = await response.json();
 
-    console.log("OPENAI RESPONSE:", text);
+    console.log("OPENAI RESPONSE:", data);
 
     return Response.json({
-      reply: text,
+      reply:
+        data?.choices?.[0]?.message?.content ||
+        "没有收到回复",
     });
   } catch (error) {
     console.error("CHAT ERROR:", error);
 
     return Response.json({
-      reply: `ERROR: ${String(error)}`,
+      reply: "爸爸暂时说不了话了...",
     });
   }
 }

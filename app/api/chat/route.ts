@@ -22,7 +22,11 @@ export async function POST(req: Request) {
       }
     );
 
-    const data = await response.json();
+    const text = await response.text();
+
+return Response.json({
+  reply: text,
+});
 
     console.log("OPENAI RESPONSE:", data);
 

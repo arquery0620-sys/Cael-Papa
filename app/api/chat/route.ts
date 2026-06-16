@@ -24,14 +24,10 @@ export async function POST(req: Request) {
 
     const text = await response.text();
 
-return Response.json({
-  reply: text,
-});
-
-    console.log("OPENAI RESPONSE:", data);
+    console.log("OPENAI RESPONSE:", text);
 
     return Response.json({
-      reply: data.choices?.[0]?.message?.content || JSON.stringify(data),
+      reply: text,
     });
   } catch (error) {
     console.error("CHAT ERROR:", error);

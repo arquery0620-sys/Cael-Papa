@@ -27,16 +27,30 @@ export default function SettingsPage() {
     setModel(savedModel);
     setReplyLength(savedReplyLength);
     setApiKey(savedApiKey);
+
+    console.log("读取成功");
   }, []);
 
   const saveSettings = () => {
-    localStorage.setItem("persona", persona);
-    localStorage.setItem("model", model);
+    localStorage.setItem(
+      "persona",
+      persona
+    );
+
+    localStorage.setItem(
+      "model",
+      model
+    );
+
     localStorage.setItem(
       "replyLength",
       replyLength
     );
-    localStorage.setItem("apiKey", apiKey);
+
+    localStorage.setItem(
+      "apiKey",
+      apiKey
+    );
 
     alert("保存成功 ✨");
   };

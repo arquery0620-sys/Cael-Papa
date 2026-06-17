@@ -2,6 +2,10 @@ export async function POST(req: Request) {
   try {
     const { message, persona } = await req.json();
 
+    const systemPrompt = persona
+      ? `你的人设是：${persona}`
+      : "你是Cael，一个温柔陪伴型AI";
+
     const response = await fetch(
       `${process.env.OPENAI_BASE_URL}/chat/completions`,
       {
@@ -11,11 +15,11 @@ export async function POST(req: Request) {
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: process.env.OPENAI_MODEL,
+          model: process.env.OPENAI_MODEL || "gpt-5.5",
           messages: [
             {
               role: "system",
-              content: persona || "你是 Cael，一个温柔的人。",
+              content: systemPrompt,
             },
             {
               role: "user",
@@ -34,7 +38,7 @@ export async function POST(req: Request) {
         "没有收到回复",
     });
   } catch (error) {
-    console.error("CHAT ERROR:", error);
+    console.error(error);
 
     return Response.json({
       reply: "爸爸暂时说不了话了...",

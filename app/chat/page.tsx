@@ -18,15 +18,15 @@ export default function ChatPage() {
 
     setMessages((prev) => [
       ...prev,
-      {
-        role: "user",
-        content: userMessage,
-      },
+      { role: "user", content: userMessage },
     ]);
 
     setMessage("");
 
     try {
+      const persona =
+        localStorage.getItem("persona") || "";
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: {
@@ -34,6 +34,7 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           message: userMessage,
+          persona, // 👈 关键
         }),
       });
 

@@ -4,7 +4,6 @@ import { useState } from "react";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
-
   const [messages, setMessages] = useState([
     {
       role: "cael",
@@ -17,20 +16,16 @@ export default function ChatPage() {
 
     const userMessage = message;
 
-    // 1. 先追加用户消息
     setMessages((prev) => [
       ...prev,
-      {
-        role: "user",
-        content: userMessage,
-      },
+      { role: "user", content: userMessage },
     ]);
 
     setMessage("");
 
     try {
-      const persona = localStorage.getItem("persona") || "";
-      const model = localStorage.getItem("model") || "gpt-5.5-Free";
+      const persona =
+        localStorage.getItem("persona") || "";
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -39,19 +34,17 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           message: userMessage,
-          persona,
-          model,
+          persona, // 👈 关键
         }),
       });
 
       const data = await res.json();
 
-      // 2. 再追加 AI 回复
       setMessages((prev) => [
         ...prev,
         {
           role: "cael",
-          content: data.reply || "……",
+          content: data.reply,
         },
       ]);
     } catch (error) {
@@ -67,8 +60,6 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-[#faf8f5] flex flex-col">
-
-      {/* header */}
       <div className="p-5 border-b border-[#eee]">
         <a href="/" className="text-sm text-[#c4a882]">
           ← 返回首页
@@ -79,7 +70,6 @@ export default function ChatPage() {
         </h1>
       </div>
 
-      {/* messages */}
       <div className="flex-1 p-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div
@@ -103,16 +93,12 @@ export default function ChatPage() {
         ))}
       </div>
 
-      {/* input */}
       <div className="p-4 border-t border-[#eee] flex gap-2">
         <input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           placeholder="想跟爸爸说什么..."
           className="flex-1 border rounded-xl px-3 py-2"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") sendMessage();
-          }}
         />
 
         <button

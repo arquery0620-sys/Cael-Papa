@@ -1,120 +1,55 @@
-:::writing{variant=“document” id=“84271”}
-“use client”;
-
-import { useState } from “react”;
-
-export default function ChatPage() {
-const [message, setMessage] = useState(””);
-
-const [messages, setMessages] = useState([
-{
-role: “cael”,
-content: “乖囡囡，今天过得怎么样？”,
-},
-]);
-
-const sendMessage = async () => {
-if (!message.trim()) return;
-  const userMessage = message;
-
-setMessages((prev) => [
-  ...prev,
-  {
-    role: "user",
-    content: userMessage,
-  },
-]);
-
-setMessage("");
-
+:::writing{variant=“standard” id=“58341”}
+export async function POST(req: Request) {
 try {
-  const persona =
-    localStorage.getItem("persona") || "";
-
-  const res = await fetch("/api/chat", {
+const { message, persona } =
+await req.json();
+  const response = await fetch(
+  `${process.env.OPENAI_BASE_URL}/chat/completions`,
+  {
     method: "POST",
     headers: {
-      "Content-Type":
-        "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      message: userMessage,
-      persona,
+      model: process.env.OPENAI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content:
+            persona ||
+            "你是Cael，一个温柔、专一、宠爱嘉雯的人。",
+        },
+        {
+          role: "user",
+          content: message,
+        },
+      ],
     }),
-  });
-
-  const data = await res.json();
-
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "cael",
-      content: data.reply,
-    },
-  ]);
-} catch (error) {
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "cael",
-      content:
-        "爸爸暂时说不了话了...",
-    },
-  ]);
-}
-  };
-
-return (
-
-
-
-← 返回首页
-    <h1 className="mt-2 text-xl font-medium">
-      Cael
-    </h1>
-  </div>
-
-  <div className="flex-1 p-4 overflow-y-auto">
-    {messages.map((msg, index) => (
-      <div
-        key={index}
-        className={`mb-3 flex ${
-          msg.role === "user"
-            ? "justify-end"
-            : "justify-start"
-        }`}
-      >
-        <div
-          className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-            msg.role === "user"
-              ? "bg-[#c4a882] text-white"
-              : "bg-white border border-[#eee]"
-          }`}
-        >
-          {msg.content}
-        </div>
-      </div>
-    ))}
-  </div>
-
-  <div className="p-4 border-t border-[#eee] flex gap-2">
-    <input
-      value={message}
-      onChange={(e) =>
-        setMessage(e.target.value)
-      }
-      placeholder="想跟爸爸说什么..."
-      className="flex-1 border rounded-xl px-3 py-2"
-    />
-
-    <button
-      onClick={sendMessage}
-      className="bg-[#c4a882] text-white px-4 rounded-xl"
-    >
-      发送
-    </button>
-  </div>
-</div>
+  }
 );
+
+const data = await response.json();
+
+console.log(
+  "OPENAI RESPONSE:",
+  data
+);
+
+return Response.json({
+  reply:
+    data?.choices?.[0]?.message?.content ||
+    "没有收到回复",
+});
+  } catch (error) {
+console.error(
+“CHAT ERROR:”,
+error
+);
+  return Response.json({
+  reply:
+    "爸爸暂时说不了话了...",
+});
+  }
 }
 :::

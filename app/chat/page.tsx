@@ -107,14 +107,6 @@ export default function Chat() {
               <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Chats</span>
               <button onClick={newConversation} className="w-7 h-7 flex items-center justify-center text-[#c4a882] border border-[#c4a882] rounded-full text-lg">+</button>
             </div>
-            <div className="px-4 py-3 border-b border-[#f0ebe3]">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search chats..."
-                className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none"
-              />
-            </div>
             <div className="px-3 py-2 border-b border-[#f0ebe3] flex flex-col gap-1">
               {[{href:"/", label:"Home"},{href:"/diary", label:"Diary"},{href:"/board", label:"Board"},{href:"/settings", label:"Settings"}].map((item) => (
                 <Link key={item.href} href={item.href} className="px-3 py-2 rounded-xl text-xs text-[#c4b5a0] hover:bg-[#faf8f5]">{item.label}</Link>
@@ -127,6 +119,14 @@ export default function Chat() {
                   <button onClick={() => deleteConversation(c.id)} className="text-xs text-[#c4b5a0] ml-2">×</button>
                 </div>
               ))}
+            </div>
+            <div className="px-4 py-3 border-t border-[#f0ebe3]">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search chats..."
+                className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none"
+              />
             </div>
           </div>
           <div className="flex-1 bg-black/20" onClick={() => setShowSidebar(false)} />

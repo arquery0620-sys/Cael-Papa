@@ -39,7 +39,7 @@ export default function Settings() {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="输入爸爸的人设..."
+            placeholder="Write your persona here..."
             className="w-full h-36 text-sm text-[#2c2018] bg-[#faf8f5] rounded-xl p-3 border border-[#f0ebe3] resize-none outline-none"
           />
         </div>
@@ -51,7 +51,7 @@ export default function Settings() {
             placeholder="claude-opus-4-5"
             className="w-full text-sm text-[#2c2018] bg-[#faf8f5] rounded-xl p-3 border border-[#f0ebe3] outline-none"
           />
-          <p className="text-xs text-[#c4b5a0] mt-2">例如：claude-opus-4-5 / gpt-4o</p>
+          <p className="text-xs text-[#c4b5a0] mt-2">e.g. claude-opus-4-5 / gpt-4o</p>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-[#f0ebe3]">
           <p className="text-xs text-[#c4b5a0] tracking-widest uppercase mb-2">Base URL</p>
@@ -75,7 +75,7 @@ export default function Settings() {
         <div className="bg-white rounded-2xl p-5 border border-[#f0ebe3]">
           <p className="text-xs text-[#c4b5a0] tracking-widest uppercase mb-2">Reply Length</p>
           <div className="flex gap-2">
-            {[["short", "简短"], ["normal", "普通"], ["long", "详细"]].map(([val, label]) => (
+            {[["short", "Short"], ["normal", "Normal"], ["long", "Long"]].map(([val, label]) => (
               <button
                 key={val}
                 onClick={() => setReplyLength(val)}
@@ -94,7 +94,7 @@ export default function Settings() {
           onClick={handleSave}
           className="w-full bg-[#c4a882] text-white text-sm py-3.5 rounded-2xl shadow-sm"
         >
-          {saved ? "已保存 ✓" : "保存设置"}
+          {saved ? "Saved ✓" : "Save Settings"}
         </button>
       </div>
     </div>

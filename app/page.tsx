@@ -7,6 +7,9 @@ export default function Home() {
         <a href="/chat" className="bg-white rounded-2xl p-5 border border-[#f0ebe3] text-sm text-[#2c2018]">
           💬 聊天
         </a>
+        <a href="/characters" className="bg-white rounded-2xl p-5 border border-[#f0ebe3] text-sm text-[#2c2018]">
+          🎭 角色
+        </a>
         <a href="/diary" className="bg-white rounded-2xl p-5 border border-[#f0ebe3] text-sm text-[#2c2018]">
           📔 日记
         </a>

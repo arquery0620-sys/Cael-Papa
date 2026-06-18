@@ -17,6 +17,8 @@ interface Conversation {
 
 export default function Chat() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [filtered, setFiltered] = useState<Conversation[]>([]);
+  const [search, setSearch] = useState("");
   const [currentConvId, setCurrentConvId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -35,9 +37,17 @@ export default function Chat() {
     fetchConversations();
   }, []);
 
+  useEffect(() => {
+    if (search.trim()) {
+      setFiltered(conversations.filter(c => c.title.toLowerCase().includes(search.toLowerCase())));
+    } else {
+      setFiltered(conversations);
+    }
+  }, [search, conversations]);
+
   const fetchConversations = async () => {
     const { data } = await supabase.from("conversations").select("*").order("created_at", { ascending: false });
-    if (data) setConversations(data);
+    if (data) { setConversations(data); setFiltered(data); }
   };
 
   const fetchMessages = async (convId: string) => {
@@ -95,14 +105,23 @@ export default function Chat() {
           <div className="w-72 bg-white h-full flex flex-col shadow-xl">
             <div className="px-5 pt-14 pb-4 flex items-center justify-between border-b border-[#f0ebe3]">
               <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Chats</span>
-              <button onClick={newConversation} className="text-xs text-[#c4a882] border border-[#c4a882] px-3 py-1.5 rounded-xl">+ New</button>
+              <button onClick={newConversation} className="w-7 h-7 flex items-center justify-center text-[#c4a882] border border-[#c4a882] rounded-full text-lg">+</button>
+            </div>
+            <div className="px-4 py-3 border-b border-[#f0ebe3]">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search chats..."
+                className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none"
+              />
+            </div>
+            <div className="px-3 py-2 border-b border-[#f0ebe3] flex flex-col gap-1">
+              {[{href:"/", label:"Home"},{href:"/diary", label:"Diary"},{href:"/board", label:"Board"},{href:"/settings", label:"Settings"}].map((item) => (
+                <Link key={item.href} href={item.href} className="px-3 py-2 rounded-xl text-xs text-[#c4b5a0] hover:bg-[#faf8f5]">{item.label}</Link>
+              ))}
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
-              {[{href:"/", label:"Home"},{href:"/diary", label:"Diary"},{href:"/board", label:"Board"},{href:"/settings", label:"Settings"}].map((item) => (
-                <Link key={item.href} href={item.href} className="px-4 py-2 rounded-xl text-xs text-[#c4b5a0]">{item.label}</Link>
-              ))}
-              <div className="border-t border-[#f0ebe3] my-2" />
-              {conversations.map((c) => (
+              {filtered.map((c) => (
                 <div key={c.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl ${currentConvId === c.id ? "bg-[#faf8f5]" : ""}`}>
                   <button onClick={() => selectConversation(c.id)} className="text-sm text-[#2c2018] text-left flex-1 truncate">{c.title}</button>
                   <button onClick={() => deleteConversation(c.id)} className="text-xs text-[#c4b5a0] ml-2">×</button>

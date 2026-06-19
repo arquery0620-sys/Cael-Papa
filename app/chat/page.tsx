@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
-import { House, Chat as ChatIcon, BookOpen, BookmarkSimple, Gear, Plus, X, MagnifyingGlass, ArrowLeft, Sparkle } from "@phosphor-icons/react";
+import { Home, MessageCircle, BookOpen, Layout, Settings, Plus, X, Search, ArrowLeft, Sparkles, BarChart2 } from "lucide-react";
 
 interface Message {
   id?: string;
@@ -18,11 +18,12 @@ interface Conversation {
 }
 
 const navItems = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/chat", label: "Chat", icon: ChatIcon },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/chat", label: "Chat", icon: MessageCircle },
   { href: "/diary", label: "Diary", icon: BookOpen },
-  { href: "/board", label: "Board", icon: BookmarkSimple },
-  { href: "/settings", label: "Settings", icon: Gear },
+  { href: "/board", label: "Board", icon: Layout },
+  { href: "/usage", label: "Usage", icon: BarChart2 },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function Chat() {
@@ -143,7 +144,7 @@ export default function Chat() {
                 const Icon = item.icon;
                 return (
                   <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#faf8f5]">
-                    <Icon size={18} color="#c4b5a0" />
+                    <Icon size={17} color="#c4b5a0" strokeWidth={1.5} />
                     <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#2c2018]">{item.label}</span>
                   </Link>
                 );
@@ -158,7 +159,7 @@ export default function Chat() {
               ))}
             </div>
             <div className="px-4 py-3 border-t border-[#f0ebe3] flex items-center gap-2">
-              <MagnifyingGlass size={14} color="#c4b5a0" />
+              <Search size={13} color="#c4b5a0" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats..." className="flex-1 text-xs text-[#2c2018] bg-transparent outline-none" />
             </div>
           </div>
@@ -179,7 +180,7 @@ export default function Chat() {
 
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-[#c4b5a0]"><ArrowLeft size={20} /></Link>
+          <Link href="/" className="text-[#c4b5a0]"><ArrowLeft size={20} strokeWidth={1.5} /></Link>
           <button onClick={() => setShowSidebar(true)} className="text-[#c4b5a0]">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
           </button>
@@ -188,10 +189,10 @@ export default function Chat() {
         <div className="flex items-center gap-3">
           {currentConvId && messages.length > 0 && (
             <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-[#c4b5a0]">
-              <Sparkle size={18} />
+              <Sparkles size={18} strokeWidth={1.5} />
             </button>
           )}
-          <Link href="/settings" className="text-[#c4b5a0]"><Gear size={18} /></Link>
+          <Link href="/settings" className="text-[#c4b5a0]"><Settings size={18} strokeWidth={1.5} /></Link>
         </div>
       </div>
 

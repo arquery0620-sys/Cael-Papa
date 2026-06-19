@@ -13,6 +13,7 @@ interface Message {
   id?: string;
   role: "user" | "assistant";
   content: string;
+  created_at?: string;
 }
 
 interface Conversation {
@@ -20,6 +21,12 @@ interface Conversation {
   title: string;
   created_at: string;
   summary?: string;
+}
+
+function formatTime(dateStr?: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
 export default function Chat() {
@@ -106,7 +113,7 @@ export default function Chat() {
       const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) }).select().single();
       if (data) { convId = data.id; setCurrentConvId(data.id); setCurrentConv(data); await fetchConversations(); }
     }
-    const userMsg: Message = { role: "user", content: input };
+    const userMsg: Message = { role: "user", content: input, created_at: new Date().toISOString() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setLoading(true);
@@ -118,14 +125,18 @@ export default function Chat() {
         body: JSON.stringify({ message: input, apiKey, baseUrl, model, systemPrompt }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply });
+      const reply = data.reply;
+      const now = new Date().toISOString();
+      setMessages((prev) => [...prev, { role: "assistant", content: reply, created_at: now }]);
+      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: reply });
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong." }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong.", created_at: new Date().toISOString() }]);
     } finally {
       setLoading(false);
     }
   };
+
+  const lastAssistantIndex = messages.map(m => m.role).lastIndexOf("assistant");
 
   return (
     <div className="min-h-screen bg-[#faf8f5] flex flex-col">
@@ -138,13 +149,11 @@ export default function Chat() {
                 <PlusIcon className="w-3.5 h-3.5" />
               </button>
             </div>
-
             <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
               <Link href="/" onClick={() => setShowSidebar(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#faf8f5]">
                 <HomeIcon className="w-5 h-5 text-[#c4b5a0]" />
                 <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#2c2018]">Home</span>
               </Link>
-
               <button onClick={() => setOpenChats(!openChats)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#faf8f5] w-full">
                 <div className="flex items-center gap-3">
                   <ChatBubbleLeftIcon className="w-5 h-5 text-[#c4b5a0]" />
@@ -154,7 +163,7 @@ export default function Chat() {
               </button>
               {openChats && (
                 <div className="ml-8 flex flex-col gap-1">
-                  <button onClick={newConversation} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#faf8f5] text-left">
+                  <button onClick={newConversation} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#faf8f5]">
                     <PlusIcon className="w-3.5 h-3.5 text-[#c4a882]" />
                     <span className="text-xs text-[#c4a882]">New chat</span>
                   </button>
@@ -166,7 +175,6 @@ export default function Chat() {
                   ))}
                 </div>
               )}
-
               <button onClick={() => setOpenMore(!openMore)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#faf8f5] w-full">
                 <div className="flex items-center gap-3">
                   <Squares2X2Icon className="w-5 h-5 text-[#c4b5a0]" />
@@ -188,7 +196,6 @@ export default function Chat() {
                   ))}
                 </div>
               )}
-
               <button onClick={() => setOpenSettings(!openSettings)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#faf8f5] w-full">
                 <div className="flex items-center gap-3">
                   <Cog6ToothIcon className="w-5 h-5 text-[#c4b5a0]" />
@@ -210,7 +217,6 @@ export default function Chat() {
                 </div>
               )}
             </div>
-
             <div className="px-4 py-3 border-t border-[#f0ebe3] flex items-center gap-2">
               <MagnifyingGlassIcon className="w-3.5 h-3.5 text-[#c4b5a0]" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats..." className="flex-1 text-xs text-[#2c2018] bg-transparent outline-none" />
@@ -250,12 +256,33 @@ export default function Chat() {
       </div>
 
       <div className="flex-1 px-6 pt-4 pb-32 flex flex-col gap-3 overflow-y-auto">
-        {messages.map((msg, i) => (
-          <div key={i} className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${msg.role === "user" ? "self-end bg-[#c4a882] text-white" : "self-start bg-white text-[#2c2018] border border-[#f0ebe3]"}`}>
-            {msg.content}
+        {messages.map((msg, i) => {
+          const isUser = msg.role === "user";
+          const isLastUser = isUser && messages.slice(i + 1).some(m => m.role === "assistant");
+          const isRead = isUser && i < lastAssistantIndex;
+          return (
+            <div key={i} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
+              <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${isUser ? "bg-[#c4a882] text-white" : "bg-white text-[#2c2018] border border-[#f0ebe3]"}`}>
+                {msg.content}
+              </div>
+              <div className={`flex items-center gap-1 mt-0.5 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                {msg.created_at && (
+                  <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>
+                )}
+                {isUser && (
+                  <span className={`text-[10px] ${isRead ? "text-[#c4a882]" : "text-[#c4b5a0]"}`}>
+                    {isRead ? "✓✓" : "✓"}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {loading && (
+          <div className="flex flex-col items-start">
+            <div className="bg-white text-[#c4b5a0] text-sm px-4 py-3 rounded-2xl border border-[#f0ebe3]">...</div>
           </div>
-        ))}
-        {loading && <div className="self-start bg-white text-[#c4b5a0] text-sm px-4 py-3 rounded-2xl border border-[#f0ebe3]">...</div>}
+        )}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-3 bg-[#faf8f5] border-t border-[#f0ebe3]">

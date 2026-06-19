@@ -4,6 +4,7 @@ import Link from "next/link";
 const items = [
   { href: "/diary", title: "Diary", sub: "write & reflect" },
   { href: "/board", title: "Board", sub: "leave a note" },
+  { href: "/usage", title: "Usage", sub: "token & cost" },
   { href: "/settings", title: "Settings", sub: "persona & api" },
 ];
 

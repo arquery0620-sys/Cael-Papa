@@ -13,6 +13,7 @@ interface Conversation {
   id: string;
   title: string;
   created_at: string;
+  summary?: string;
 }
 
 export default function Chat() {
@@ -20,10 +21,13 @@ export default function Chat() {
   const [filtered, setFiltered] = useState<Conversation[]>([]);
   const [search, setSearch] = useState("");
   const [currentConvId, setCurrentConvId] = useState<string | null>(null);
+  const [currentConv, setCurrentConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
@@ -57,17 +61,36 @@ export default function Chat() {
 
   const newConversation = async () => {
     const { data } = await supabase.from("conversations").insert({ title: "New chat" }).select().single();
-    if (data) { setCurrentConvId(data.id); setMessages([]); await fetchConversations(); setShowSidebar(false); }
+    if (data) { setCurrentConvId(data.id); setCurrentConv(data); setMessages([]); await fetchConversations(); setShowSidebar(false); }
   };
 
-  const selectConversation = async (id: string) => {
-    setCurrentConvId(id); await fetchMessages(id); setShowSidebar(false);
+  const selectConversation = async (conv: Conversation) => {
+    setCurrentConvId(conv.id); setCurrentConv(conv); await fetchMessages(conv.id); setShowSidebar(false);
   };
 
   const deleteConversation = async (id: string) => {
     await supabase.from("conversations").delete().eq("id", id);
-    if (currentConvId === id) { setCurrentConvId(null); setMessages([]); }
+    if (currentConvId === id) { setCurrentConvId(null); setCurrentConv(null); setMessages([]); }
     await fetchConversations();
+  };
+
+  const summarizeConversation = async () => {
+    if (!currentConvId || messages.length === 0) return;
+    setSummarizing(true);
+    const transcript = messages.map(m => `${m.role === "user" ? "Me" : "Cael"}: ${m.content}`).join("\n");
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: `Please summarize this conversation concisely in 3-5 sentences, capturing the key topics and emotional tone:\n\n${transcript}`,
+        apiKey, baseUrl, model, systemPrompt: "",
+      }),
+    });
+    const data = await res.json();
+    await supabase.from("conversations").update({ summary: data.reply }).eq("id", currentConvId);
+    setCurrentConv(prev => prev ? { ...prev, summary: data.reply } : null);
+    setSummarizing(false);
+    setShowSummary(true);
   };
 
   const sendMessage = async () => {
@@ -75,7 +98,7 @@ export default function Chat() {
     let convId = currentConvId;
     if (!convId) {
       const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) }).select().single();
-      if (data) { convId = data.id; setCurrentConvId(data.id); await fetchConversations(); }
+      if (data) { convId = data.id; setCurrentConvId(data.id); setCurrentConv(data); await fetchConversations(); }
     }
     const userMsg: Message = { role: "user", content: input };
     setMessages((prev) => [...prev, userMsg]);
@@ -109,27 +132,33 @@ export default function Chat() {
             </div>
             <div className="px-3 py-2 border-b border-[#f0ebe3] flex flex-col gap-1">
               {[{href:"/", label:"Home"},{href:"/diary", label:"Diary"},{href:"/board", label:"Board"},{href:"/settings", label:"Settings"}].map((item) => (
-                <Link key={item.href} href={item.href} className="px-3 py-2 rounded-xl text-xs text-[#c4b5a0] hover:bg-[#faf8f5]">{item.label}</Link>
+                <Link key={item.href} href={item.href} className="px-3 py-2 rounded-xl text-xs text-[#c4b5a0]">{item.label}</Link>
               ))}
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
               {filtered.map((c) => (
                 <div key={c.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl ${currentConvId === c.id ? "bg-[#faf8f5]" : ""}`}>
-                  <button onClick={() => selectConversation(c.id)} className="text-sm text-[#2c2018] text-left flex-1 truncate">{c.title}</button>
+                  <button onClick={() => selectConversation(c)} className="text-sm text-[#2c2018] text-left flex-1 truncate">{c.title}</button>
                   <button onClick={() => deleteConversation(c.id)} className="text-xs text-[#c4b5a0] ml-2">×</button>
                 </div>
               ))}
             </div>
             <div className="px-4 py-3 border-t border-[#f0ebe3]">
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search chats..."
-                className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none"
-              />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats..." className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none" />
             </div>
           </div>
           <div className="flex-1 bg-black/20" onClick={() => setShowSidebar(false)} />
+        </div>
+      )}
+
+      {showSummary && currentConv?.summary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
+          <div className="bg-white rounded-2xl p-6 border border-[#f0ebe3] shadow-xl max-w-sm w-full">
+            <p className="text-xs text-[#c4b5a0] tracking-widest uppercase mb-3">Summary</p>
+            <p className="text-sm text-[#2c2018] leading-relaxed">{currentConv.summary}</p>
+            <button onClick={() => setShowSummary(false)} className="mt-4 w-full text-xs text-[#c4b5a0] border border-[#f0ebe3] py-2 rounded-xl">Close</button>
+          </div>
+          <div className="absolute inset-0 bg-black/20 -z-10" onClick={() => setShowSummary(false)} />
         </div>
       )}
 
@@ -138,9 +167,16 @@ export default function Chat() {
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Cael</span>
-        <Link href="/settings" className="text-[#c4b5a0]">
-          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        </Link>
+        <div className="flex items-center gap-3">
+          {currentConvId && messages.length > 0 && (
+            <button onClick={summarizing ? undefined : summarizeConversation} className="text-xs text-[#c4b5a0]">
+              {summarizing ? "..." : currentConv?.summary ? "view summary" : "summarize"}
+            </button>
+          )}
+          <Link href="/settings" className="text-[#c4b5a0]">
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </Link>
+        </div>
       </div>
 
       <div className="flex-1 px-6 pt-4 pb-32 flex flex-col gap-3 overflow-y-auto">

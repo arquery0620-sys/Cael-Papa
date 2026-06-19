@@ -48,12 +48,24 @@ export default function Chat() {
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
+  const [myBubble, setMyBubble] = useState("#c4a882");
+  const [caelBubble, setCaelBubble] = useState("#ffffff");
+  const [bgUrl, setBgUrl] = useState("");
+  const [bgOpacity, setBgOpacity] = useState(0.3);
+  const [bgWhiteness, setBgWhiteness] = useState(250);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
     setApiKey(localStorage.getItem("cael_api_key") || "");
     setBaseUrl(localStorage.getItem("cael_base_url") || "https://az.zlapi.vip/v1");
     setModel(localStorage.getItem("cael_model") || "claude-opus-4-5");
     setSystemPrompt(localStorage.getItem("cael_prompt") || "");
+    setMyBubble(localStorage.getItem("cael_my_bubble") || "#c4a882");
+    setCaelBubble(localStorage.getItem("cael_cael_bubble") || "#ffffff");
+    setBgUrl(localStorage.getItem("cael_bg_url") || "");
+    setBgOpacity(parseFloat(localStorage.getItem("cael_bg_opacity") || "0.3"));
+    setBgWhiteness(parseInt(localStorage.getItem("cael_bg_whiteness") || "250"));
+    setAvatarUrl(localStorage.getItem("cael_avatar_url") || "");
     fetchConversations();
   }, []);
 
@@ -126,8 +138,7 @@ export default function Chat() {
       });
       const data = await res.json();
       const reply = data.reply;
-      const now = new Date().toISOString();
-      setMessages((prev) => [...prev, { role: "assistant", content: reply, created_at: now }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: reply, created_at: new Date().toISOString() }]);
       await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: reply });
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong.", created_at: new Date().toISOString() }]);
@@ -139,7 +150,11 @@ export default function Chat() {
   const lastAssistantIndex = messages.map(m => m.role).lastIndexOf("assistant");
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex flex-col">
+    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
+      {bgUrl && (
+        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />
+      )}
+
       {showSidebar && (
         <div className="fixed inset-0 z-40 flex">
           <div className="w-72 bg-white h-full flex flex-col shadow-xl">
@@ -258,19 +273,31 @@ export default function Chat() {
       <div className="flex-1 px-6 pt-4 pb-32 flex flex-col gap-3 overflow-y-auto">
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
-          const isLastUser = isUser && messages.slice(i + 1).some(m => m.role === "assistant");
           const isRead = isUser && i < lastAssistantIndex;
           return (
             <div key={i} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-              <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm ${isUser ? "bg-[#c4a882] text-white" : "bg-white text-[#2c2018] border border-[#f0ebe3]"}`}>
-                {msg.content}
-              </div>
-              <div className={`flex items-center gap-1 mt-0.5 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                {msg.created_at && (
-                  <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>
+              <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                {!isUser && (
+                  avatarUrl ? (
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mb-1">
+                      <img src={avatarUrl} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
+                  )
                 )}
+                <div className="max-w-[75%] px-4 py-3 rounded-2xl text-sm" style={{
+                  backgroundColor: isUser ? myBubble : caelBubble,
+                  color: isUser ? "#ffffff" : "#2c2018",
+                  border: isUser ? "none" : "1px solid #f0ebe3"
+                }}>
+                  {msg.content}
+                </div>
+              </div>
+              <div className={`flex items-center gap-1 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                {msg.created_at && <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>}
                 {isUser && (
-                  <span className={`text-[10px] ${isRead ? "text-[#c4a882]" : "text-[#c4b5a0]"}`}>
+                  <span className="text-[10px]" style={{ color: isRead ? myBubble : "#c4b5a0" }}>
                     {isRead ? "✓✓" : "✓"}
                   </span>
                 )}
@@ -279,16 +306,23 @@ export default function Chat() {
           );
         })}
         {loading && (
-          <div className="flex flex-col items-start">
-            <div className="bg-white text-[#c4b5a0] text-sm px-4 py-3 rounded-2xl border border-[#f0ebe3]">...</div>
+          <div className="flex items-end gap-2">
+            {avatarUrl ? (
+              <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                <img src={avatarUrl} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
+            )}
+            <div className="px-4 py-3 rounded-2xl text-sm border border-[#f0ebe3]" style={{ backgroundColor: caelBubble, color: "#c4b5a0" }}>...</div>
           </div>
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-3 bg-[#faf8f5] border-t border-[#f0ebe3]">
+      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-3 border-t border-[#f0ebe3]" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
         <div className="flex gap-2 items-end">
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Write to Cael..." rows={1} className="flex-1 text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] resize-none outline-none" />
-          <button onClick={sendMessage} disabled={loading} className="bg-[#c4a882] text-white text-sm px-4 py-3 rounded-2xl">Send</button>
+          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl" style={{ backgroundColor: myBubble }}>Send</button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
+import { House, Chat as ChatIcon, BookOpen, BookmarkSimple, Gear, Plus, X, MagnifyingGlass, ArrowLeft, Sparkle } from "@phosphor-icons/react";
 
 interface Message {
   id?: string;
@@ -17,11 +18,11 @@ interface Conversation {
 }
 
 const navItems = [
-  { href: "/", label: "Home", icon: <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/> },
-  { href: "/chat", label: "Chat", icon: <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/> },
-  { href: "/diary", label: "Diary", icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></> },
-  { href: "/board", label: "Board", icon: <><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></> },
-  { href: "/settings", label: "Settings", icon: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></> },
+  { href: "/", label: "Home", icon: House },
+  { href: "/chat", label: "Chat", icon: ChatIcon },
+  { href: "/diary", label: "Diary", icon: BookOpen },
+  { href: "/board", label: "Board", icon: BookmarkSimple },
+  { href: "/settings", label: "Settings", icon: Gear },
 ];
 
 export default function Chat() {
@@ -133,26 +134,32 @@ export default function Chat() {
           <div className="w-72 bg-white h-full flex flex-col shadow-xl">
             <div className="px-5 pt-14 pb-4 flex items-center justify-between border-b border-[#f0ebe3]">
               <span className="font-[family-name:var(--font-cormorant)] text-2xl italic text-[#2c2018]">Cael</span>
-              <button onClick={newConversation} className="w-7 h-7 flex items-center justify-center text-[#c4a882] border border-[#c4a882] rounded-full text-lg">+</button>
+              <button onClick={newConversation} className="w-7 h-7 flex items-center justify-center text-[#c4a882] border border-[#c4a882] rounded-full">
+                <Plus size={14} />
+              </button>
             </div>
             <div className="px-3 py-3 border-b border-[#f0ebe3] flex flex-col gap-1">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#faf8f5]">
-                  <svg width="16" height="16" fill="none" stroke="#c4b5a0" strokeWidth="1.5" viewBox="0 0 24 24">{item.icon}</svg>
-                  <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#2c2018]">{item.label}</span>
-                </Link>
-              ))}
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#faf8f5]">
+                    <Icon size={18} color="#c4b5a0" />
+                    <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#2c2018]">{item.label}</span>
+                  </Link>
+                );
+              })}
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
               {filtered.map((c) => (
                 <div key={c.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl ${currentConvId === c.id ? "bg-[#faf8f5]" : ""}`}>
                   <button onClick={() => selectConversation(c)} className="font-[family-name:var(--font-cormorant)] text-base text-[#2c2018] text-left flex-1 truncate">{c.title}</button>
-                  <button onClick={() => deleteConversation(c.id)} className="text-xs text-[#c4b5a0] ml-2">×</button>
+                  <button onClick={() => deleteConversation(c.id)} className="text-[#c4b5a0] ml-2"><X size={12} /></button>
                 </div>
               ))}
             </div>
-            <div className="px-4 py-3 border-t border-[#f0ebe3]">
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats..." className="w-full text-xs text-[#2c2018] bg-[#faf8f5] rounded-xl px-3 py-2 border border-[#f0ebe3] outline-none" />
+            <div className="px-4 py-3 border-t border-[#f0ebe3] flex items-center gap-2">
+              <MagnifyingGlass size={14} color="#c4b5a0" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats..." className="flex-1 text-xs text-[#2c2018] bg-transparent outline-none" />
             </div>
           </div>
           <div className="flex-1 bg-black/20" onClick={() => setShowSidebar(false)} />
@@ -171,19 +178,20 @@ export default function Chat() {
       )}
 
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
-        <button onClick={() => setShowSidebar(true)} className="text-[#c4b5a0]">
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-        </button>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="text-[#c4b5a0]"><ArrowLeft size={20} /></Link>
+          <button onClick={() => setShowSidebar(true)} className="text-[#c4b5a0]">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+        </div>
         <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Cael</span>
         <div className="flex items-center gap-3">
           {currentConvId && messages.length > 0 && (
-            <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-xs text-[#c4b5a0]">
-              {summarizing ? "..." : currentConv?.summary ? "summary" : "summarize"}
+            <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-[#c4b5a0]">
+              <Sparkle size={18} />
             </button>
           )}
-          <Link href="/settings" className="text-[#c4b5a0]">
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          </Link>
+          <Link href="/settings" className="text-[#c4b5a0]"><Gear size={18} /></Link>
         </div>
       </div>
 

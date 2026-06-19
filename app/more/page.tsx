@@ -17,8 +17,8 @@ export default function More() {
       <div className="px-6 grid grid-cols-2 gap-3">
         {items.map((item) => (
           <Link key={item.href} href={item.href} className="bg-white rounded-2xl p-5 border border-[#f0ebe3] flex flex-col gap-1">
-            <span className="text-sm text-[#2c2018] font-medium">{item.title}</span>
-            <span className="text-xs text-[#c4b5a0]">{item.sub}</span>
+            <span className="font-[family-name:var(--font-cormorant)] text-xl text-[#2c2018]">{item.title}</span>
+            <span className="font-[family-name:var(--font-cormorant)] text-sm text-[#c4b5a0] italic">{item.sub}</span>
           </Link>
         ))}
       </div>

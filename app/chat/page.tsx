@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import {
@@ -7,6 +7,7 @@ import {
   Cog6ToothIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon,
   ArrowLeftIcon, SparklesIcon, ChartBarIcon, ChevronDownIcon,
   ChevronRightIcon, PencilSquareIcon, KeyIcon, BookmarkIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 
 interface Message {
@@ -14,6 +15,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   created_at?: string;
+  imageUrl?: string;
 }
 
 interface Conversation {
@@ -54,6 +56,10 @@ export default function Chat() {
   const [bgOpacity, setBgOpacity] = useState(0.3);
   const [bgWhiteness, setBgWhiteness] = useState(250);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setApiKey(localStorage.getItem("cael_api_key") || "");
@@ -68,6 +74,10 @@ export default function Chat() {
     setAvatarUrl(localStorage.getItem("cael_avatar_url") || "");
     fetchConversations();
   }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     if (search.trim()) {
@@ -102,6 +112,17 @@ export default function Chat() {
     await fetchConversations();
   };
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    const { error } = await supabase.storage.from("assets").upload(`chat/${Date.now()}-${file.name}`, file, { upsert: true });
+    if (error) { alert("Upload failed"); setUploadingImage(false); return; }
+    const { data } = supabase.storage.from("assets").getPublicUrl(`chat/${Date.now()}-${file.name}`);
+    setPendingImage(data.publicUrl);
+    setUploadingImage(false);
+  };
+
   const summarizeConversation = async () => {
     if (!currentConvId || messages.length === 0) return;
     setSummarizing(true);
@@ -119,22 +140,25 @@ export default function Chat() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+    if (!input.trim() && !pendingImage || loading) return;
     let convId = currentConvId;
     if (!convId) {
-      const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) }).select().single();
+      const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) || "Image" }).select().single();
       if (data) { convId = data.id; setCurrentConvId(data.id); setCurrentConv(data); await fetchConversations(); }
     }
-    const userMsg: Message = { role: "user", content: input, created_at: new Date().toISOString() };
+    const userMsg: Message = { role: "user", content: input, created_at: new Date().toISOString(), imageUrl: pendingImage || undefined };
     setMessages((prev) => [...prev, userMsg]);
+    const sentInput = input;
+    const sentImage = pendingImage;
     setInput("");
+    setPendingImage(null);
     setLoading(true);
-    await supabase.from("messages").insert({ conversation_id: convId, role: "user", content: input });
+    await supabase.from("messages").insert({ conversation_id: convId, role: "user", content: sentInput, imageUrl: sentImage });
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input, apiKey, baseUrl, model, systemPrompt }),
+        body: JSON.stringify({ message: sentInput, apiKey, baseUrl, model, systemPrompt, imageUrl: sentImage }),
       });
       const data = await res.json();
       const reply = data.reply;
@@ -270,7 +294,7 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 pt-4 pb-32 flex flex-col gap-3 overflow-y-auto">
+      <div className="flex-1 px-6 pt-4 pb-36 flex flex-col gap-3 overflow-y-auto">
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
           const isRead = isUser && i < lastAssistantIndex;
@@ -286,12 +310,21 @@ export default function Chat() {
                     <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
                   )
                 )}
-                <div className="max-w-[75%] px-4 py-3 rounded-2xl text-sm" style={{
-                  backgroundColor: isUser ? myBubble : caelBubble,
-                  color: isUser ? "#ffffff" : "#2c2018",
-                  border: isUser ? "none" : "1px solid #f0ebe3"
-                }}>
-                  {msg.content}
+                <div className="max-w-[75%] flex flex-col gap-1">
+                  {msg.imageUrl && (
+                    <div className="rounded-2xl overflow-hidden">
+                      <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />
+                    </div>
+                  )}
+                  {msg.content && (
+                    <div className="px-4 py-3 rounded-2xl text-sm" style={{
+                      backgroundColor: isUser ? myBubble : caelBubble,
+                      color: isUser ? "#ffffff" : "#2c2018",
+                      border: isUser ? "none" : "1px solid #f0ebe3"
+                    }}>
+                      {msg.content}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className={`flex items-center gap-1 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
@@ -317,10 +350,23 @@ export default function Chat() {
             <div className="px-4 py-3 rounded-2xl text-sm border border-[#f0ebe3]" style={{ backgroundColor: caelBubble, color: "#c4b5a0" }}>...</div>
           </div>
         )}
+        <div ref={bottomRef} />
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 px-6 pb-8 pt-3 border-t border-[#f0ebe3]" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-[#f0ebe3]" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
+        {pendingImage && (
+          <div className="mb-2 relative inline-block">
+            <img src={pendingImage} className="h-16 w-16 object-cover rounded-xl" />
+            <button onClick={() => setPendingImage(null)} className="absolute -top-1 -right-1 w-4 h-4 bg-[#c4b5a0] rounded-full flex items-center justify-center">
+              <XMarkIcon className="w-2.5 h-2.5 text-white" />
+            </button>
+          </div>
+        )}
         <div className="flex gap-2 items-end">
+          <button onClick={() => imageRef.current?.click()} disabled={uploadingImage} className="text-[#c4b5a0] p-2">
+            {uploadingImage ? <span className="text-xs">...</span> : <PhotoIcon className="w-6 h-6" />}
+          </button>
+          <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Write to Cael..." rows={1} className="flex-1 text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] resize-none outline-none" />
           <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl" style={{ backgroundColor: myBubble }}>Send</button>
         </div>

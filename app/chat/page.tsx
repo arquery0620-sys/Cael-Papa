@@ -169,7 +169,7 @@ export default function Chat() {
         body: JSON.stringify({ message: sentInput, apiKey, baseUrl, model, systemPrompt, imageUrl: sentImage }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply, created_at: new Date().toISOString() }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply, created_at: new Date().toISOString(), imageUrl: data.stickerUrl || undefined }]);
       await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply });
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong.", created_at: new Date().toISOString() }]);

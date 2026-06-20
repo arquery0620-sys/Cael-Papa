@@ -7,7 +7,7 @@ import {
   Cog6ToothIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon,
   ArrowLeftIcon, SparklesIcon, ChartBarIcon, ChevronDownIcon,
   ChevronRightIcon, PencilSquareIcon, KeyIcon, BookmarkIcon,
-  CameraIcon, PhotoIcon, DocumentArrowUpIcon,
+  CameraIcon, PhotoIcon, DocumentArrowUpIcon, ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
 interface Message {
@@ -40,6 +40,9 @@ export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [regeneratingIdx, setRegeneratingIdx] = useState<number | null>(null);
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
   const [summarizing, setSummarizing] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
@@ -131,16 +134,45 @@ export default function Chat() {
     if (file) await uploadAndSetImage(file);
   };
 
+  const callAI = async (userMessage: string, imageUrl?: string) => {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: userMessage, apiKey, baseUrl, model, systemPrompt, imageUrl }),
+    });
+    return await res.json();
+  };
+
+  const regenerate = async (idx: number) => {
+    const prevUserMsg = messages.slice(0, idx).reverse().find(m => m.role === "user");
+    if (!prevUserMsg) return;
+    setRegeneratingIdx(idx);
+    const data = await callAI(prevUserMsg.content, prevUserMsg.imageUrl);
+    const newMessages = [...messages];
+    newMessages[idx] = { ...newMessages[idx], content: data.reply, imageUrl: data.stickerUrl || undefined };
+    setMessages(newMessages);
+    if (currentConvId && newMessages[idx].id) {
+      await supabase.from("messages").update({ content: data.reply }).eq("id", newMessages[idx].id);
+    }
+    setRegeneratingIdx(null);
+  };
+
+  const saveEdit = async (idx: number) => {
+    const newMessages = [...messages];
+    newMessages[idx] = { ...newMessages[idx], content: editContent };
+    setMessages(newMessages);
+    if (currentConvId && newMessages[idx].id) {
+      await supabase.from("messages").update({ content: editContent }).eq("id", newMessages[idx].id);
+    }
+    setEditingIdx(null);
+    setEditContent("");
+  };
+
   const summarizeConversation = async () => {
     if (!currentConvId || messages.length === 0) return;
     setSummarizing(true);
     const transcript = messages.map(m => `${m.role === "user" ? "Me" : "Cael"}: ${m.content}`).join("\n");
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: `Please summarize this conversation concisely in 3-5 sentences:\n\n${transcript}`, apiKey, baseUrl, model, systemPrompt: "" }),
-    });
-    const data = await res.json();
+    const data = await callAI(`Please summarize this conversation concisely in 3-5 sentences:\n\n${transcript}`);
     await supabase.from("conversations").update({ summary: data.reply }).eq("id", currentConvId);
     setCurrentConv(prev => prev ? { ...prev, summary: data.reply } : null);
     setSummarizing(false);
@@ -163,14 +195,9 @@ export default function Chat() {
     setLoading(true);
     await supabase.from("messages").insert({ conversation_id: convId, role: "user", content: sentInput, imageUrl: sentImage });
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: sentInput, apiKey, baseUrl, model, systemPrompt, imageUrl: sentImage }),
-      });
-      const data = await res.json();
+      const data = await callAI(sentInput, sentImage || undefined);
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply, created_at: new Date().toISOString(), imageUrl: data.stickerUrl || undefined }]);
-      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply });
+      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply, imageUrl: data.stickerUrl || null });
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong.", created_at: new Date().toISOString() }]);
     } finally {
@@ -194,7 +221,7 @@ export default function Chat() {
                 <XMarkIcon className="w-4 h-4 text-[#c4b5a0]" />
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="grid grid-cols-3 gap-3">
               {[
                 { label: "Camera", icon: CameraIcon, onClick: () => { setShowAddMenu(false); cameraRef.current?.click(); } },
                 { label: "Photos", icon: PhotoIcon, onClick: () => { setShowAddMenu(false); photoRef.current?.click(); } },
@@ -329,6 +356,9 @@ export default function Chat() {
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
           const isRead = isUser && i < lastAssistantIndex;
+          const isRegenerating = regeneratingIdx === i;
+          const isEditing = editingIdx === i;
+
           return (
             <div key={i} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
               <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
@@ -339,16 +369,50 @@ export default function Chat() {
                 )}
                 <div className="max-w-[75%] flex flex-col gap-1">
                   {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
-                  {msg.content && (
-                    <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#2c2018", border: isUser ? "none" : "1px solid #f0ebe3" }}>
-                      {msg.content}
+                  {isEditing ? (
+                    <div className="flex flex-col gap-2">
+                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] outline-none resize-none" rows={3} />
+                      <div className="flex gap-2">
+                        <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: myBubble }}>Save</button>
+                        <button onClick={() => setEditingIdx(null)} className="text-xs text-[#c4b5a0] px-3 py-1.5 rounded-xl border border-[#f0ebe3]">Cancel</button>
+                      </div>
                     </div>
+                  ) : (
+                    msg.content && (
+                      <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#2c2018", border: isUser ? "none" : "1px solid #f0ebe3" }}>
+                        {isRegenerating ? <span className="text-[#c4b5a0]">...</span> : msg.content}
+                      </div>
+                    )
                   )}
                 </div>
+                {!isEditing && (
+                  <button
+                    onClick={() => {
+                      if (isUser) { setEditingIdx(i); setEditContent(msg.content); }
+                      else regenerate(i);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 text-[#c4b5a0] mb-1 flex-shrink-0"
+                  >
+                    {isUser
+                      ? <PencilSquareIcon className="w-3.5 h-3.5" />
+                      : <ArrowPathIcon className="w-3.5 h-3.5" />
+                    }
+                  </button>
+                )}
               </div>
-              <div className={`flex items-center gap-1 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`flex items-center gap-2 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                 {msg.created_at && <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>}
                 {isUser && <span className="text-[10px]" style={{ color: isRead ? myBubble : "#c4b5a0" }}>{isRead ? "✓✓" : "✓"}</span>}
+                {!isUser && !isEditing && (
+                  <button onClick={() => regenerate(i)} className="text-[10px] text-[#c4b5a0] flex items-center gap-0.5">
+                    <ArrowPathIcon className="w-3 h-3" />
+                  </button>
+                )}
+                {isUser && !isEditing && (
+                  <button onClick={() => { setEditingIdx(i); setEditContent(msg.content); }} className="text-[10px] text-[#c4b5a0] flex items-center gap-0.5">
+                    <PencilSquareIcon className="w-3 h-3" />
+                  </button>
+                )}
               </div>
             </div>
           );

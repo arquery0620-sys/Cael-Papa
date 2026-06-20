@@ -27,26 +27,44 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ backgroundColor: "#fdf0f3" }}>
-      <div className="fixed bottom-0 left-0 w-72 h-96 pointer-events-none" style={{ opacity: 0.2 }}>
-        <svg viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          <path d="M100 280 C100 280 98 240 95 210 C92 180 88 160 90 130 C92 100 95 80 100 60" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
-          <path d="M95 180 C80 175 60 165 45 150 C55 160 75 172 95 175" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M93 200 C108 195 128 185 143 170 C133 180 113 192 93 195" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M90 60 C85 45 78 30 75 15 C72 5 74 0 78 2 C82 4 86 15 88 28 C90 42 90 55 90 60" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M100 60 C105 45 112 30 115 15 C118 5 116 0 112 2 C108 4 104 15 102 28 C100 42 100 55 100 60" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M95 60 C95 45 96 25 100 10 C104 25 105 45 105 60" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
-          <path d="M88 58 C75 52 60 44 52 32 C58 38 72 48 88 55" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M108 58 C121 52 136 44 144 32 C138 38 124 48 108 55" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M96 62 C96 62 98 68 100 70 C102 68 104 62 104 62" stroke="#e8829a" strokeWidth="1" strokeLinecap="round"/>
-          <line x1="100" y1="62" x2="100" y2="75" stroke="#e8829a" strokeWidth="0.8"/>
-          <circle cx="100" cy="77" r="1.5" fill="#e8829a"/>
-          <line x1="95" y1="63" x2="91" y2="76" stroke="#e8829a" strokeWidth="0.8"/>
-          <circle cx="90" cy="78" r="1.5" fill="#e8829a"/>
-          <line x1="105" y1="63" x2="109" y2="76" stroke="#e8829a" strokeWidth="0.8"/>
-          <circle cx="110" cy="78" r="1.5" fill="#e8829a"/>
-          <path d="M90 130 C80 125 65 118 55 105 C60 112 75 122 90 128" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
-          <path d="M55 105 C50 95 48 82 50 74 C52 66 56 64 59 67 C62 70 62 82 60 93 C58 100 56 103 55 105" stroke="#e8829a" strokeWidth="1.1" strokeLinecap="round"/>
-          <path d="M55 105 C60 95 65 82 65 74 C65 66 61 64 59 67" stroke="#e8829a" strokeWidth="1.1" strokeLinecap="round"/>
+
+      <div className="fixed -bottom-10 -left-10 w-96 h-[500px] pointer-events-none" style={{ opacity: 0.18 }}>
+        <svg viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+          <path d="M150 400 C148 370 145 340 142 310 C139 280 136 255 138 225 C140 195 144 170 150 145" stroke="#e8829a" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M148 225 C130 218 108 205 88 188 C100 198 125 212 147 220" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M145 260 C165 253 188 240 205 222 C193 232 170 245 145 255" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M142 310 C122 305 98 295 78 280 C92 290 118 302 142 308" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M150 145 C145 125 136 105 128 85 C124 70 118 55 110 42 C106 35 100 28 96 22 C92 16 90 10 93 6 C96 2 102 4 108 10 C114 16 120 26 126 40 C132 54 138 72 142 90 C146 108 149 128 150 145" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M150 145 C148 128 145 108 148 90 C151 72 157 54 163 40 C169 26 175 16 181 10 C187 4 193 2 196 6 C199 10 197 16 193 22 C189 28 183 35 179 42 C171 55 165 70 161 85 C153 105 151 125 150 145" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M130 85 C118 75 102 62 88 46 C96 56 114 70 130 82" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M170 85 C182 75 198 62 212 46 C204 56 186 70 170 82" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M110 42 C100 35 86 25 72 12 C80 20 96 32 110 40" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
+          <path d="M190 42 C200 35 214 25 228 12 C220 20 204 32 190 40" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
+          <path d="M140 148 C132 144 122 138 115 130 C108 122 104 112 106 104 C108 96 116 92 124 94 C132 96 138 104 142 114 C146 124 148 136 148 145" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
+          <path d="M160 148 C168 144 178 138 185 130 C192 122 196 112 194 104 C192 96 184 92 176 94 C168 96 162 104 158 114 C154 124 152 136 152 145" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="150" y1="145" x2="150" y2="168" stroke="#e8829a" strokeWidth="1"/>
+          <line x1="143" y1="147" x2="136" y2="170" stroke="#e8829a" strokeWidth="1"/>
+          <line x1="157" y1="147" x2="164" y2="170" stroke="#e8829a" strokeWidth="1"/>
+          <line x1="138" y1="148" x2="128" y2="168" stroke="#e8829a" strokeWidth="1"/>
+          <line x1="162" y1="148" x2="172" y2="168" stroke="#e8829a" strokeWidth="1"/>
+          <ellipse cx="150" cy="170" rx="2.5" ry="3" fill="#e8829a"/>
+          <ellipse cx="135" cy="172" rx="2" ry="2.5" fill="#e8829a"/>
+          <ellipse cx="165" cy="172" rx="2" ry="2.5" fill="#e8829a"/>
+          <ellipse cx="127" cy="170" rx="2" ry="2.5" fill="#e8829a"/>
+          <ellipse cx="173" cy="170" rx="2" ry="2.5" fill="#e8829a"/>
+          <path d="M138 225 C125 232 108 245 92 262 C85 270 78 280 75 292 C72 304 76 316 84 322 C92 328 104 326 114 318 C124 310 132 297 138 283 C144 269 147 253 148 240 C149 228 148 218 147 210" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M147 210 C140 200 130 188 118 178 C110 171 100 166 92 165 C84 164 77 168 74 175 C71 182 74 192 80 200 C86 208 96 214 107 218 C118 222 130 224 140 224 C146 224 150 223 152 221" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M152 221 C158 232 162 246 162 260 C162 274 158 288 152 298 C146 308 138 314 130 314 C122 314 115 308 112 298 C109 288 110 275 115 263 C120 251 128 241 136 234 C142 229 148 226 152 224" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M152 224 C160 218 172 210 184 206 C194 202 204 202 210 207 C216 212 216 222 212 232 C208 242 200 250 190 255 C180 260 168 262 158 260 C150 258 144 253 142 247" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="148" y1="240" x2="148" y2="258" stroke="#e8829a" strokeWidth="0.8"/>
+          <line x1="143" y1="241" x2="138" y2="257" stroke="#e8829a" strokeWidth="0.8"/>
+          <line x1="153" y1="241" x2="158" y2="257" stroke="#e8829a" strokeWidth="0.8"/>
+          <ellipse cx="148" cy="260" rx="2" ry="2.5" fill="#e8829a"/>
+          <ellipse cx="137" cy="259" rx="1.8" ry="2.2" fill="#e8829a"/>
+          <ellipse cx="159" cy="259" rx="1.8" ry="2.2" fill="#e8829a"/>
+          <path d="M88 188 C82 182 74 174 68 164 C64 156 62 147 65 140 C68 133 76 130 84 133 C90 136 94 143 96 151" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M96 151 C97 158 96 166 93 174 C90 182 85 188 80 190 C75 192 70 190 67 185" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+          <path d="M68 164 C62 158 55 150 52 140 C49 130 51 118 57 112 C63 106 72 107 79 113" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
         </svg>
       </div>
 
@@ -110,8 +128,12 @@ export default function Home() {
       </div>
 
       <div className="flex-1 flex flex-col justify-end px-8 pb-32 relative z-10">
-        <p className="text-xs tracking-[0.2em] uppercase mb-8" style={{ color: "#e8829a" }}>welcome home</p>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-5xl italic leading-tight mb-4" style={{ color: "#5c2d3a" }}>Jiawen & Cael</h1>
+        <h2 className="font-[family-name:var(--font-cormorant)] text-2xl italic mb-6" style={{ color: "#e8829a", fontStyle: "italic", fontWeight: 300 }}>
+          Welcome Home
+        </h2>
+        <h1 className="font-[family-name:var(--font-cormorant)] text-5xl italic leading-tight mb-4" style={{ color: "#5c2d3a" }}>
+          Jiawen & Cael
+        </h1>
         <div className="flex items-baseline gap-3 mb-2">
           <span className="font-[family-name:var(--font-cormorant)] text-6xl font-light" style={{ color: "#e8829a" }}>{days}</span>
           <span className="text-xs tracking-[0.15em] uppercase" style={{ color: "#e8829a" }}>days together</span>

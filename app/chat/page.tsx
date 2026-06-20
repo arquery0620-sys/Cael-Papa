@@ -7,7 +7,7 @@ import {
   Cog6ToothIcon, PlusIcon, XMarkIcon, MagnifyingGlassIcon,
   ArrowLeftIcon, SparklesIcon, ChartBarIcon, ChevronDownIcon,
   ChevronRightIcon, PencilSquareIcon, KeyIcon, BookmarkIcon,
-  PhotoIcon,
+  CameraIcon, PhotoIcon, DocumentArrowUpIcon,
 } from "@heroicons/react/24/outline";
 
 interface Message {
@@ -43,6 +43,7 @@ export default function Chat() {
   const [summarizing, setSummarizing] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
   const [openMore, setOpenMore] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const [openChats, setOpenChats] = useState(true);
@@ -58,7 +59,9 @@ export default function Chat() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const imageRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,15 +115,20 @@ export default function Chat() {
     await fetchConversations();
   };
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const uploadAndSetImage = async (file: File) => {
     setUploadingImage(true);
-    const { error } = await supabase.storage.from("assets").upload(`chat/${Date.now()}-${file.name}`, file, { upsert: true });
+    setShowAddMenu(false);
+    const path = `chat/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage.from("assets").upload(path, file, { upsert: true });
     if (error) { alert("Upload failed"); setUploadingImage(false); return; }
-    const { data } = supabase.storage.from("assets").getPublicUrl(`chat/${Date.now()}-${file.name}`);
+    const { data } = supabase.storage.from("assets").getPublicUrl(path);
     setPendingImage(data.publicUrl);
     setUploadingImage(false);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) await uploadAndSetImage(file);
   };
 
   const summarizeConversation = async () => {
@@ -140,7 +148,7 @@ export default function Chat() {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() && !pendingImage || loading) return;
+    if ((!input.trim() && !pendingImage) || loading) return;
     let convId = currentConvId;
     if (!convId) {
       const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) || "Image" }).select().single();
@@ -161,9 +169,8 @@ export default function Chat() {
         body: JSON.stringify({ message: sentInput, apiKey, baseUrl, model, systemPrompt, imageUrl: sentImage }),
       });
       const data = await res.json();
-      const reply = data.reply;
-      setMessages((prev) => [...prev, { role: "assistant", content: reply, created_at: new Date().toISOString() }]);
-      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: reply });
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply, created_at: new Date().toISOString() }]);
+      await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply });
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Something went wrong.", created_at: new Date().toISOString() }]);
     } finally {
@@ -175,8 +182,32 @@ export default function Chat() {
 
   return (
     <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
-      {bgUrl && (
-        <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />
+      {bgUrl && <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />}
+
+      {showAddMenu && (
+        <div className="fixed inset-0 z-50 flex items-end">
+          <div className="absolute inset-0 bg-black/20" onClick={() => setShowAddMenu(false)} />
+          <div className="relative w-full bg-white rounded-t-3xl p-6 pb-10">
+            <div className="flex justify-between items-center mb-6">
+              <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Add to Chat</span>
+              <button onClick={() => setShowAddMenu(false)} className="w-8 h-8 rounded-full bg-[#faf8f5] flex items-center justify-center">
+                <XMarkIcon className="w-4 h-4 text-[#c4b5a0]" />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[
+                { label: "Camera", icon: CameraIcon, onClick: () => { setShowAddMenu(false); cameraRef.current?.click(); } },
+                { label: "Photos", icon: PhotoIcon, onClick: () => { setShowAddMenu(false); photoRef.current?.click(); } },
+                { label: "Files", icon: DocumentArrowUpIcon, onClick: () => { setShowAddMenu(false); fileRef.current?.click(); } },
+              ].map(({ label, icon: Icon, onClick }) => (
+                <button key={label} onClick={onClick} className="flex flex-col items-center gap-2 bg-[#faf8f5] rounded-2xl p-4">
+                  <Icon className="w-7 h-7 text-[#2c2018]" />
+                  <span className="text-xs text-[#2c2018]">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {showSidebar && (
@@ -302,26 +333,14 @@ export default function Chat() {
             <div key={i} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
               <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                 {!isUser && (
-                  avatarUrl ? (
-                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mb-1">
-                      <img src={avatarUrl} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
-                  )
+                  avatarUrl
+                    ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
+                    : <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
                 )}
                 <div className="max-w-[75%] flex flex-col gap-1">
-                  {msg.imageUrl && (
-                    <div className="rounded-2xl overflow-hidden">
-                      <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />
-                    </div>
-                  )}
+                  {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
                   {msg.content && (
-                    <div className="px-4 py-3 rounded-2xl text-sm" style={{
-                      backgroundColor: isUser ? myBubble : caelBubble,
-                      color: isUser ? "#ffffff" : "#2c2018",
-                      border: isUser ? "none" : "1px solid #f0ebe3"
-                    }}>
+                    <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#2c2018", border: isUser ? "none" : "1px solid #f0ebe3" }}>
                       {msg.content}
                     </div>
                   )}
@@ -329,29 +348,26 @@ export default function Chat() {
               </div>
               <div className={`flex items-center gap-1 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                 {msg.created_at && <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>}
-                {isUser && (
-                  <span className="text-[10px]" style={{ color: isRead ? myBubble : "#c4b5a0" }}>
-                    {isRead ? "✓✓" : "✓"}
-                  </span>
-                )}
+                {isUser && <span className="text-[10px]" style={{ color: isRead ? myBubble : "#c4b5a0" }}>{isRead ? "✓✓" : "✓"}</span>}
               </div>
             </div>
           );
         })}
         {loading && (
           <div className="flex items-end gap-2">
-            {avatarUrl ? (
-              <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
-                <img src={avatarUrl} className="w-full h-full object-cover" />
-              </div>
-            ) : (
-              <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
-            )}
+            {avatarUrl
+              ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
+              : <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
+            }
             <div className="px-4 py-3 rounded-2xl text-sm border border-[#f0ebe3]" style={{ backgroundColor: caelBubble, color: "#c4b5a0" }}>...</div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
+
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+      <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+      <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
 
       <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-[#f0ebe3]" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
         {pendingImage && (
@@ -362,13 +378,13 @@ export default function Chat() {
             </button>
           </div>
         )}
+        {uploadingImage && <p className="text-xs text-[#c4b5a0] mb-2">Uploading...</p>}
         <div className="flex gap-2 items-end">
-          <button onClick={() => imageRef.current?.click()} disabled={uploadingImage} className="text-[#c4b5a0] p-2">
-            {uploadingImage ? <span className="text-xs">...</span> : <PhotoIcon className="w-6 h-6" />}
+          <button onClick={() => setShowAddMenu(true)} className="w-9 h-9 rounded-full border border-[#f0ebe3] flex items-center justify-center text-[#c4b5a0] flex-shrink-0">
+            <PlusIcon className="w-5 h-5" />
           </button>
-          <input ref={imageRef} type="file" accept="image/*" className="hidden" onChange={handleImageSelect} />
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="Write to Cael..." rows={1} className="flex-1 text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] resize-none outline-none" />
-          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl" style={{ backgroundColor: myBubble }}>Send</button>
+          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl flex-shrink-0" style={{ backgroundColor: myBubble }}>Send</button>
         </div>
       </div>
     </div>

@@ -1,0 +1,54 @@
+<svg viewBox="0 0 300 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 主茎 -->
+  <path d="M155 420 C153 390 150 355 148 320 C146 285 144 255 146 225 C148 195 152 170 158 145" stroke="#e8829a" strokeWidth="1.8" strokeLinecap="round"/>
+  <!-- 叶子 -->
+  <path d="M150 300 C132 292 110 278 90 260 C105 272 130 286 150 295" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <path d="M152 270 C170 262 192 248 210 230 C196 242 174 256 152 265" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <path d="M147 340 C128 334 106 322 86 306 C100 316 124 330 147 337" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <path d="M153 355 C172 349 196 337 214 320 C200 330 178 344 153 352" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <!-- 花苞（左上） -->
+  <path d="M100 180 C95 165 90 148 88 132 C86 118 87 106 91 98 C95 90 101 88 106 92 C111 96 113 106 112 118 C111 130 107 144 104 156 C102 164 101 172 100 180" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <path d="M100 180 C104 165 108 148 108 132 C108 118 105 106 101 98" stroke="#e8829a" strokeWidth="1.2" strokeLinecap="round"/>
+  <path d="M94 140 C84 132 70 120 60 105 C68 116 82 128 94 138" stroke="#e8829a" strokeWidth="1.1" strokeLinecap="round"/>
+  <path d="M106 140 C116 132 130 120 140 105 C132 116 118 128 106 138" stroke="#e8829a" strokeWidth="1.1" strokeLinecap="round"/>
+  <!-- 茎连接花苞 -->
+  <path d="M148 225 C136 218 120 206 108 192 C116 200 132 212 148 220" stroke="#e8829a" strokeWidth="1.3" strokeLinecap="round"/>
+  <!-- 大花朵1（左中） -->
+  <path d="M148 225 C135 235 118 248 102 265 C94 274 86 285 82 298 C78 311 82 324 90 330 C98 336 110 334 120 326 C130 318 138 305 143 290 C148 275 150 258 150 243" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M150 243 C145 230 136 216 124 205 C116 197 106 192 97 191 C88 190 80 195 77 203 C74 211 77 222 84 231 C91 240 102 247 114 251 C126 255 139 256 148 253" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M148 253 C155 265 158 280 156 295 C154 308 148 320 140 327 C132 334 122 336 114 332" stroke="#e8829a" strokeWidth="1.4" strokeLinecap="round"/>
+  <path d="M148 253 C158 248 170 240 180 228 C188 218 192 206 188 196 C184 186 174 182 164 185 C154 188 146 196 142 207 C138 218 138 230 140 240" stroke="#e8829a" strokeWidth="1.4" strokeLinecap="round"/>
+  <!-- 花蕊1 -->
+  <line x1="148" y1="248" x2="148" y2="268" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="144" y1="249" x2="139" y2="268" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="152" y1="249" x2="157" y2="268" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="141" y1="251" x2="133" y2="268" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="155" y1="251" x2="163" y2="268" stroke="#e8829a" strokeWidth="0.9"/>
+  <ellipse cx="148" cy="270" rx="2.2" ry="2.8" fill="#e8829a"/>
+  <ellipse cx="138" cy="270" rx="2" ry="2.5" fill="#e8829a"/>
+  <ellipse cx="158" cy="270" rx="2" ry="2.5" fill="#e8829a"/>
+  <ellipse cx="132" cy="269" rx="1.8" ry="2.2" fill="#e8829a"/>
+  <ellipse cx="164" cy="269" rx="1.8" ry="2.2" fill="#e8829a"/>
+  <!-- 花纹脉络1 -->
+  <path d="M148 270 C142 280 136 292 132 305" stroke="#e8829a" strokeWidth="0.6" strokeLinecap="round" opacity="0.6"/>
+  <path d="M148 270 C154 280 160 292 164 305" stroke="#e8829a" strokeWidth="0.6" strokeLinecap="round" opacity="0.6"/>
+  <!-- 大花朵2（右上） -->
+  <path d="M158 145 C168 132 182 118 198 108 C210 100 222 96 232 100 C242 104 246 114 244 126 C242 138 234 150 223 158 C212 166 198 170 185 170 C172 170 161 165 156 157" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M156 157 C160 168 168 180 180 190 C190 198 202 202 212 200 C222 198 228 190 228 180 C228 170 222 160 213 153 C204 146 192 143 181 143 C170 143 161 147 157 153" stroke="#e8829a" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M157 153 C148 145 138 134 132 122 C126 110 126 96 132 88 C138 80 148 78 157 82 C166 86 172 96 174 108 C176 120 173 133 168 143" stroke="#e8829a" strokeWidth="1.4" strokeLinecap="round"/>
+  <path d="M168 143 C178 136 190 126 198 114 C204 104 206 92 202 83 C198 74 188 70 178 73 C168 76 160 84 156 94 C152 104 152 116 155 126 C158 136 163 143 168 143" stroke="#e8829a" strokeWidth="1.4" strokeLinecap="round"/>
+  <!-- 花蕊2 -->
+  <line x1="185" y1="158" x2="185" y2="140" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="180" y1="160" x2="174" y2="143" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="190" y1="160" x2="196" y2="143" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="176" y1="163" x2="167" y2="148" stroke="#e8829a" strokeWidth="0.9"/>
+  <line x1="194" y1="163" x2="203" y2="148" stroke="#e8829a" strokeWidth="0.9"/>
+  <ellipse cx="185" cy="138" rx="2.2" ry="2.8" fill="#e8829a"/>
+  <ellipse cx="173" cy="141" rx="2" ry="2.5" fill="#e8829a"/>
+  <ellipse cx="197" cy="141" rx="2" ry="2.5" fill="#e8829a"/>
+  <ellipse cx="166" cy="146" rx="1.8" ry="2.2" fill="#e8829a"/>
+  <ellipse cx="204" cy="146" rx="1.8" ry="2.2" fill="#e8829a"/>
+  <!-- 花纹脉络2 -->
+  <path d="M185 158 C178 168 170 178 162 186" stroke="#e8829a" strokeWidth="0.6" strokeLinecap="round" opacity="0.6"/>
+  <path d="M185 158 C192 168 200 178 208 186" stroke="#e8829a" strokeWidth="0.6" strokeLinecap="round" opacity="0.6"/>
+</svg>

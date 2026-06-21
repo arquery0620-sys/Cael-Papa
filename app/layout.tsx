@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={cormorant.variable}>
-      <body style={{ backgroundColor: "#fdf0f3", fontFamily: "var(--font-cormorant)", fontStyle: "italic" }}>
+      <body style={{ backgroundColor: "#fdf0f3", fontFamily: "var(--font-cormorant), Georgia, serif" }}>
         {children}
       </body>
     </html>

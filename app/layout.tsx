@@ -1,25 +1,16 @@
-import type { Metadata } from "next";
-import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import { Cormorant_Garamond } from "next/font/google";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300","400","500","600","700"],
   variable: "--font-cormorant",
-  style: ["normal", "italic"],
 });
 
-export const metadata: Metadata = {
-  title: "Cael",
-  description: "",
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en" className={cormorant.variable}>
-      <body style={{ backgroundColor: "#fdf0f3", fontFamily: "var(--font-cormorant), Georgia, serif" }}>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

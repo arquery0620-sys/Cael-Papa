@@ -18,6 +18,13 @@ function getDaysTogether() {
 export default function Home() {
   const [days, setDays] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const todayDate = now.getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthName = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const [openMore, setOpenMore] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const [homeBg, setHomeBg] = useState("");

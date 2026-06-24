@@ -212,7 +212,7 @@ export default function Chat() {
   const lastAssistantIndex = messages.map(m => m.role).lastIndexOf("assistant");
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
+    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: "#ffffff" }}>
       {bgUrl && <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />}
 
       {showAddMenu && (
@@ -283,12 +283,12 @@ export default function Chat() {
             </div>
             <div className="flex-1 px-6 py-4 flex flex-col">
               <Link href="/" onClick={() => setShowSidebar(false)} className="flex items-baseline gap-2 py-3 border-b border-gray-100">
-                <span className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-900">ホーム</span>
+                <span className="font-[family-name:var(--font-noto-jp)] text-sm font-light text-gray-900">ホーム</span>
                 <span className="text-xs text-gray-400">首页</span>
               </Link>
               {menuItems.map((item) => (
                 <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-baseline gap-2 py-3 border-b border-gray-100 last:border-0">
-                  <span className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-900">{item.ja}</span>
+                  <span className="font-[family-name:var(--font-noto-jp)] text-sm font-light text-gray-900">{item.ja}</span>
                   <span className="text-xs text-gray-400">{item.zh}</span>
                 </Link>
               ))}

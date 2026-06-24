@@ -42,10 +42,10 @@ export default function Home() {
               <span className="font-[family-name:var(--font-cormorant)] text-2xl italic text-[#1a1a1a]">Cael</span>
             </div>
             <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
-              {[{ href: "/", label: "Home", icon: HomeIcon }, { href: "/chat", label: "Chat", icon: ChatBubbleLeftIcon }].map(({ href, label, icon: Icon }) => (
+              {[{ href: "/", label: "Home", ja: "ホーム", icon: HomeIcon }, { href: "/chat", label: "Chat", ja: "チャット", icon: ChatBubbleLeftIcon }].map(({ href, label, icon: Icon }) => (
                 <Link key={href} href={href} onClick={() => setShowMenu(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#ffffff]">
                   <Icon className="w-5 h-5 text-[#888888]" />
-                  <span className="font-[family-name:var(--font-cormorant)] text-lg text-[#1a1a1a]">{label}</span>
+                  <span className="font-[family-name:var(--font-noto-jp)] text-sm font-light text-gray-900">{item.ja || label}</span><span className="text-xs text-gray-400 ml-1">{label}</span>
                 </Link>
               ))}
               <button onClick={() => setOpenMore(!openMore)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#ffffff] w-full">
@@ -57,7 +57,7 @@ export default function Home() {
               </button>
               {openMore && (
                 <div className="ml-8 flex flex-col gap-1">
-                  {[{ href: "/diary", label: "Diary", icon: BookOpenIcon }, { href: "/board", label: "Board", icon: BookmarkIcon }, { href: "/usage", label: "Usage", icon: ChartBarIcon }].map(({ href, label, icon: Icon }) => (
+                  {[{ href: "/diary", label: "Diary", ja: "日記", icon: BookOpenIcon }, { href: "/board", label: "Board", ja: "伝言板", icon: BookmarkIcon }, { href: "/usage", label: "Usage", ja: "使用量", icon: ChartBarIcon }].map(({ href, label, icon: Icon }) => (
                     <Link key={href} href={href} onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#ffffff]">
                       <Icon className="w-3.5 h-3.5 text-[#888888]" />
                       <span className="font-[family-name:var(--font-cormorant)] text-sm text-[#1a1a1a]">{label}</span>
@@ -74,7 +74,7 @@ export default function Home() {
               </button>
               {openSettings && (
                 <div className="ml-8 flex flex-col gap-1">
-                  {[{ href: "/settings", label: "Persona", icon: PencilSquareIcon }, { href: "/settings", label: "API Key", icon: KeyIcon }].map(({ href, label, icon: Icon }) => (
+                  {[{ href: "/settings", label: "Persona", ja: "人物設定", icon: PencilSquareIcon }, { href: "/settings", label: "API Key", ja: "APIキー", icon: KeyIcon }].map(({ href, label, icon: Icon }) => (
                     <Link key={label} href={href} onClick={() => setShowMenu(false)} className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-[#ffffff]">
                       <Icon className="w-3.5 h-3.5 text-[#888888]" />
                       <span className="font-[family-name:var(--font-cormorant)] text-sm text-[#1a1a1a]">{label}</span>

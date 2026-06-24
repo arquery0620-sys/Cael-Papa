@@ -30,7 +30,6 @@ function formatTime(dateStr?: string) {
 }
 
 const menuItems = [
-  { href: "/chat", ja: "チャット", zh: "聊天" },
   { href: "/diary", ja: "日記", zh: "日记" },
   { href: "/board", ja: "伝言板", zh: "留言板" },
   { href: "/usage", ja: "使用量", zh: "用量" },
@@ -65,6 +64,7 @@ export default function Chat() {
   const [bgOpacity, setBgOpacity] = useState(0.3);
   const [bgWhiteness, setBgWhiteness] = useState(250);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [userAvatarUrl, setUserAvatarUrl] = useState("");
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -86,6 +86,7 @@ export default function Chat() {
     setBgOpacity(parseFloat(localStorage.getItem("cael_bg_opacity") || "0.3"));
     setBgWhiteness(parseInt(localStorage.getItem("cael_bg_whiteness") || "250"));
     setAvatarUrl(localStorage.getItem("cael_avatar_url") || "");
+    setUserAvatarUrl(localStorage.getItem("cael_user_avatar_url") || "");
     fetchConversations();
   }, []);
 
@@ -112,7 +113,7 @@ export default function Chat() {
   };
 
   const newConversation = async () => {
-    const { data } = await supabase.from("conversations").insert({ title: "新对话" }).select().single();
+    const { data } = await supabase.from("conversations").insert({ title: "新対話" }).select().single();
     if (data) { setCurrentConvId(data.id); setCurrentConv(data); setMessages([]); await fetchConversations(); setShowSidebar(false); }
   };
 
@@ -182,12 +183,11 @@ export default function Chat() {
     setSummarizing(false);
     setShowSummary(true);
   };
-
   const sendMessage = async () => {
     if ((!input.trim() && !pendingImage) || loading) return;
     let convId = currentConvId;
     if (!convId) {
-      const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) || "图片" }).select().single();
+      const { data } = await supabase.from("conversations").insert({ title: input.slice(0, 20) || "画像" }).select().single();
       if (data) { convId = data.id; setCurrentConvId(data.id); setCurrentConv(data); await fetchConversations(); }
     }
     const userMsg: Message = { role: "user", content: input, created_at: new Date().toISOString(), imageUrl: pendingImage || undefined };
@@ -203,7 +203,7 @@ export default function Chat() {
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply, created_at: new Date().toISOString(), imageUrl: data.stickerUrl || undefined }]);
       await supabase.from("messages").insert({ conversation_id: convId, role: "assistant", content: data.reply, imageUrl: data.stickerUrl || null });
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "出错了", created_at: new Date().toISOString() }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "エラー", created_at: new Date().toISOString() }]);
     } finally {
       setLoading(false);
     }
@@ -220,19 +220,19 @@ export default function Chat() {
           <div className="absolute inset-0 bg-black/20" onClick={() => setShowAddMenu(false)} />
           <div className="relative w-full bg-white rounded-t-3xl p-6 pb-10">
             <div className="flex justify-between items-center mb-6">
-              <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">添付 / Add</span>
-              <button onClick={() => setShowAddMenu(false)} className="w-8 h-8 rounded-full bg-[#faf8f5] flex items-center justify-center">
-                <XMarkIcon className="w-4 h-4 text-[#c4b5a0]" />
+              <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-gray-800">添付 / 添加</span>
+              <button onClick={() => setShowAddMenu(false)} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <XMarkIcon className="w-4 h-4 text-gray-400" />
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: "カメラ / Camera", onClick: () => { setShowAddMenu(false); cameraRef.current?.click(); } },
-                { label: "写真 / Photos", onClick: () => { setShowAddMenu(false); photoRef.current?.click(); } },
-                { label: "ファイル / Files", onClick: () => { setShowAddMenu(false); fileRef.current?.click(); } },
+                { label: "カメラ\nCamera", onClick: () => { setShowAddMenu(false); cameraRef.current?.click(); } },
+                { label: "写真\nPhotos", onClick: () => { setShowAddMenu(false); photoRef.current?.click(); } },
+                { label: "ファイル\nFiles", onClick: () => { setShowAddMenu(false); fileRef.current?.click(); } },
               ].map(({ label, onClick }) => (
-                <button key={label} onClick={onClick} className="flex flex-col items-center gap-2 bg-[#faf8f5] rounded-2xl p-4">
-                  <span className="text-xs text-[#2c2018] text-center leading-relaxed">{label}</span>
+                <button key={label} onClick={onClick} className="flex flex-col items-center gap-2 bg-gray-50 rounded-2xl p-4">
+                  <span className="text-xs text-gray-700 text-center whitespace-pre-line">{label}</span>
                 </button>
               ))}
             </div>
@@ -243,58 +243,57 @@ export default function Chat() {
       {showSidebar && (
         <div className="fixed inset-0 z-40 flex">
           <div className="w-72 bg-white h-full flex flex-col shadow-xl">
-            {/* 头像区域 */}
             <div className="px-6 pt-14 pb-5 border-b border-gray-100">
-              <div className="flex items-center gap-3 mb-3">
-                {avatarUrl ? (
-                  <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0">
-                    <img src={avatarUrl} className="w-full h-full object-cover" />
+              <div className="flex items-center gap-3">
+                {userAvatarUrl ? (
+                  <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                    <img src={userAvatarUrl} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center text-gray-400 font-[family-name:var(--font-cormorant)] text-xl italic">J</div>
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex-shrink-0 flex items-center justify-center font-[family-name:var(--font-cormorant)] text-xl italic text-gray-400">J</div>
                 )}
                 <div>
-                  <p className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-900">Jiawen</p>
-                  <p className="text-xs text-gray-400">{dateStr}</p>
+                  <p className="font-[family-name:var(--font-cormorant)] text-xl italic text-gray-900">Jiawen</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{dateStr}</p>
                 </div>
               </div>
             </div>
-
-            {/* 对话列表 */}
-            <div className="px-4 py-3 border-b border-gray-100">
-              <button onClick={() => setOpenChats(!openChats)} className="flex items-center justify-between w-full mb-2">
-                <span className="text-xs text-gray-400 tracking-widest uppercase">チャット / 聊天</span>
+            <div className="px-5 py-3 border-b border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-gray-400">チャット / 聊天</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={(e) => { e.stopPropagation(); newConversation(); }} className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center">
+                  <button onClick={newConversation} className="w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center">
                     <PlusIcon className="w-3 h-3 text-gray-400" />
                   </button>
-                  {openChats ? <ChevronDownIcon className="w-3 h-3 text-gray-400" /> : <ChevronRightIcon className="w-3 h-3 text-gray-400" />}
+                  <button onClick={() => setOpenChats(!openChats)}>
+                    {openChats ? <ChevronDownIcon className="w-3 h-3 text-gray-400" /> : <ChevronRightIcon className="w-3 h-3 text-gray-400" />}
+                  </button>
                 </div>
-              </button>
+              </div>
               {openChats && (
-                <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
+                <div className="flex flex-col gap-0.5 max-h-36 overflow-y-auto">
                   {filtered.map((c) => (
                     <div key={c.id} className={`flex items-center justify-between px-2 py-1.5 rounded-lg ${currentConvId === c.id ? "bg-gray-100" : ""}`}>
                       <button onClick={() => selectConversation(c)} className="text-sm text-gray-700 text-left flex-1 truncate">{c.title}</button>
-                      <button onClick={() => deleteConversation(c.id)} className="text-gray-300 ml-2"><XMarkIcon className="w-3 h-3" /></button>
+                      <button onClick={() => deleteConversation(c.id)}><XMarkIcon className="w-3 h-3 text-gray-300" /></button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-
-            {/* 菜单 */}
-            <div className="flex-1 px-6 py-4 flex flex-col gap-1">
+            <div className="flex-1 px-6 py-4 flex flex-col">
+              <Link href="/" onClick={() => setShowSidebar(false)} className="flex items-baseline gap-2 py-3 border-b border-gray-100">
+                <span className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-900">ホーム</span>
+                <span className="text-xs text-gray-400">首页</span>
+              </Link>
               {menuItems.map((item) => (
-                <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-baseline gap-2 py-2.5 border-b border-gray-50 last:border-0">
+                <Link key={item.href} href={item.href} onClick={() => setShowSidebar(false)} className="flex items-baseline gap-2 py-3 border-b border-gray-100 last:border-0">
                   <span className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-900">{item.ja}</span>
                   <span className="text-xs text-gray-400">{item.zh}</span>
                 </Link>
               ))}
             </div>
-
-            {/* 搜索 */}
-            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2">
+            <div className="px-5 py-3 border-t border-gray-100 flex items-center gap-2">
               <MagnifyingGlassIcon className="w-3.5 h-3.5 text-gray-300" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="検索 / 搜索" className="flex-1 text-xs text-gray-600 bg-transparent outline-none" />
             </div>
@@ -305,10 +304,10 @@ export default function Chat() {
 
       {showSummary && currentConv?.summary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6">
-          <div className="bg-white rounded-2xl p-6 border border-[#f0ebe3] shadow-xl max-w-sm w-full">
-            <p className="text-xs text-[#c4b5a0] tracking-widest uppercase mb-3">まとめ / 摘要</p>
-            <p className="text-sm text-[#2c2018] leading-relaxed">{currentConv.summary}</p>
-            <button onClick={() => setShowSummary(false)} className="mt-4 w-full text-xs text-[#c4b5a0] border border-[#f0ebe3] py-2 rounded-xl">閉じる / 关闭</button>
+          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full">
+            <p className="text-xs text-gray-400 tracking-widest uppercase mb-3">まとめ / 摘要</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{currentConv.summary}</p>
+            <button onClick={() => setShowSummary(false)} className="mt-4 w-full text-xs text-gray-400 border border-gray-200 py-2 rounded-xl">閉じる / 关闭</button>
           </div>
           <div className="absolute inset-0 bg-black/20 -z-10" onClick={() => setShowSummary(false)} />
         </div>
@@ -316,15 +315,15 @@ export default function Chat() {
 
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/" className="text-[#c4b5a0]"><ArrowLeftIcon className="w-5 h-5" /></Link>
-          <button onClick={() => setShowSidebar(true)} className="text-[#c4b5a0]">
+          <Link href="/" className="text-gray-400"><ArrowLeftIcon className="w-5 h-5" /></Link>
+          <button onClick={() => setShowSidebar(true)} className="text-gray-400">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
           </button>
         </div>
-        <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-[#2c2018]">Cael</span>
+        <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-gray-800">Cael</span>
         <div className="flex items-center gap-3">
           {currentConvId && messages.length > 0 && (
-            <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-[#c4b5a0]">
+            <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-gray-400">
               <SparklesIcon className="w-5 h-5" />
             </button>
           )}
@@ -343,39 +342,35 @@ export default function Chat() {
                 {!isUser && (
                   avatarUrl
                     ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
-                    : <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
+                    : <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-xs border border-gray-200 bg-gray-100 text-gray-400">C</div>
                 )}
                 <div className="max-w-[75%] flex flex-col gap-1">
                   {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
                   {isEditing ? (
                     <div className="flex flex-col gap-2">
-                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] outline-none resize-none" rows={3} />
+                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-gray-700 bg-white rounded-2xl px-4 py-3 border border-gray-200 outline-none resize-none" rows={3} />
                       <div className="flex gap-2">
                         <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: myBubble }}>保存</button>
-                        <button onClick={() => setEditingIdx(null)} className="text-xs text-[#c4b5a0] px-3 py-1.5 rounded-xl border border-[#f0ebe3]">取消</button>
+                        <button onClick={() => setEditingIdx(null)} className="text-xs text-gray-400 px-3 py-1.5 rounded-xl border border-gray-200">キャンセル</button>
                       </div>
                     </div>
                   ) : (
                     msg.content && (
                       <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#2c2018", border: isUser ? "none" : "1px solid #f0ebe3" }}>
-                        {isRegenerating ? <span className="text-[#c4b5a0]">...</span> : msg.content}
+                        {isRegenerating ? <span className="text-gray-400">...</span> : msg.content}
                       </div>
                     )
                   )}
                 </div>
               </div>
               <div className={`flex items-center gap-2 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                {msg.created_at && <span className="text-[10px] text-[#c4b5a0]">{formatTime(msg.created_at)}</span>}
-                {isUser && <span className="text-[10px]" style={{ color: isRead ? myBubble : "#c4b5a0" }}>{isRead ? "✓✓" : "✓"}</span>}
+                {msg.created_at && <span className="text-xs text-gray-400">{formatTime(msg.created_at)}</span>}
+                {isUser && <span className="text-xs" style={{ color: isRead ? myBubble : "#c4b5a0" }}>{isRead ? "✓✓" : "✓"}</span>}
                 {!isUser && !isEditing && (
-                  <button onClick={() => regenerate(i)} className="text-[#c4b5a0]">
-                    <ArrowPathIcon className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => regenerate(i)} className="text-gray-400"><ArrowPathIcon className="w-3 h-3" /></button>
                 )}
                 {isUser && !isEditing && (
-                  <button onClick={() => { setEditingIdx(i); setEditContent(msg.content); }} className="text-[#c4b5a0]">
-                    <PencilSquareIcon className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => { setEditingIdx(i); setEditContent(msg.content); }} className="text-gray-400"><PencilSquareIcon className="w-3 h-3" /></button>
                 )}
               </div>
             </div>
@@ -385,9 +380,9 @@ export default function Chat() {
           <div className="flex items-end gap-2">
             {avatarUrl
               ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
-              : <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] border border-[#f0ebe3]" style={{ backgroundColor: caelBubble }}>C</div>
+              : <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs border border-gray-200 bg-gray-100 text-gray-400">C</div>
             }
-            <div className="px-4 py-3 rounded-2xl text-sm border border-[#f0ebe3]" style={{ backgroundColor: caelBubble, color: "#c4b5a0" }}>...</div>
+            <div className="px-4 py-3 rounded-2xl text-sm border border-gray-200 bg-white text-gray-400">...</div>
           </div>
         )}
         <div ref={bottomRef} />
@@ -397,21 +392,21 @@ export default function Chat() {
       <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
 
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-[#f0ebe3]" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness - 2},${bgWhiteness - 7})` }}>
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-gray-100 bg-white">
         {pendingImage && (
           <div className="mb-2 relative inline-block">
             <img src={pendingImage} className="h-16 w-16 object-cover rounded-xl" />
-            <button onClick={() => setPendingImage(null)} className="absolute -top-1 -right-1 w-4 h-4 bg-[#c4b5a0] rounded-full flex items-center justify-center">
+            <button onClick={() => setPendingImage(null)} className="absolute -top-1 -right-1 w-4 h-4 bg-gray-400 rounded-full flex items-center justify-center">
               <XMarkIcon className="w-2.5 h-2.5 text-white" />
             </button>
           </div>
         )}
-        {uploadingImage && <p className="text-xs text-[#c4b5a0] mb-2">アップロード中...</p>}
+        {uploadingImage && <p className="text-xs text-gray-400 mb-2">アップロード中...</p>}
         <div className="flex gap-2 items-end">
-          <button onClick={() => setShowAddMenu(true)} className="w-9 h-9 rounded-full border border-[#f0ebe3] flex items-center justify-center text-[#c4b5a0] flex-shrink-0">
+          <button onClick={() => setShowAddMenu(true)} className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 flex-shrink-0">
             <PlusIcon className="w-5 h-5" />
           </button>
-          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="メッセージ / 写点什么..." rows={1} className="flex-1 text-sm text-[#2c2018] bg-white rounded-2xl px-4 py-3 border border-[#f0ebe3] resize-none outline-none" />
+          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="メッセージ / 写点什么..." rows={1} className="flex-1 text-sm text-gray-700 bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200 resize-none outline-none" />
           <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl flex-shrink-0" style={{ backgroundColor: myBubble }}>送信</button>
         </div>
       </div>

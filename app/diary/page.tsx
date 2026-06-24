@@ -54,34 +54,34 @@ export default function Diary() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] flex flex-col">
+    <div className="min-h-screen bg-[#ffffff] flex flex-col">
       <div className="px-6 pt-14 pb-2 flex items-center justify-between">
-        <span className="text-sm text-[#2c2018] font-medium">Diary</span>
-        <a href="/" className="text-[#c4b5a0] text-sm">back</a>
+        <span className="text-sm text-[#1a1a1a] font-medium">Diary</span>
+        <a href="/" className="text-[#888888] text-sm">back</a>
       </div>
       <div className="flex-1 px-6 pt-4 flex flex-col gap-4 pb-24">
-        <div className="bg-white rounded-2xl p-5 border border-[#f0ebe3]">
+        <div className="bg-white rounded-2xl p-5 border border-[#e5e5e5]">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="What happened today..."
-            className="w-full h-40 text-sm text-[#2c2018] bg-[#faf8f5] rounded-xl p-3 border border-[#f0ebe3] resize-none outline-none"
+            className="w-full h-40 text-sm text-[#1a1a1a] bg-[#ffffff] rounded-xl p-3 border border-[#e5e5e5] resize-none outline-none"
           />
-          <button onClick={saveDiary} disabled={loading} className="mt-3 w-full bg-[#c4a882] text-white text-sm py-3 rounded-2xl">
+          <button onClick={saveDiary} disabled={loading} className="mt-3 w-full bg-[#1a1a1a] text-white text-sm py-3 rounded-2xl">
             Save
           </button>
         </div>
         {diaries.map((diary) => (
-          <div key={diary.id} className="bg-white rounded-2xl p-5 border border-[#f0ebe3]">
-            <p className="text-xs text-[#c4b5a0] mb-2">{new Date(diary.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
-            <p className="text-sm text-[#2c2018] whitespace-pre-wrap">{diary.content}</p>
+          <div key={diary.id} className="bg-white rounded-2xl p-5 border border-[#e5e5e5]">
+            <p className="text-xs text-[#888888] mb-2">{new Date(diary.created_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
+            <p className="text-sm text-[#1a1a1a] whitespace-pre-wrap">{diary.content}</p>
             {diary.ai_comment ? (
-              <div className="mt-3 pt-3 border-t border-[#f0ebe3]">
-                <p className="text-xs text-[#c4b5a0] mb-1">Cael says</p>
-                <p className="text-sm text-[#c4a882] whitespace-pre-wrap">{diary.ai_comment}</p>
+              <div className="mt-3 pt-3 border-t border-[#e5e5e5]">
+                <p className="text-xs text-[#888888] mb-1">Cael says</p>
+                <p className="text-sm text-[#1a1a1a] whitespace-pre-wrap">{diary.ai_comment}</p>
               </div>
             ) : (
-              <button onClick={() => getComment(diary)} className="mt-3 text-xs text-[#c4b5a0] border border-[#f0ebe3] px-3 py-1.5 rounded-xl">
+              <button onClick={() => getComment(diary)} className="mt-3 text-xs text-[#888888] border border-[#e5e5e5] px-3 py-1.5 rounded-xl">
                 Ask Cael to respond
               </button>
             )}

@@ -7,7 +7,7 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
 });
 
-export default function RootLayout({ children }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={cormorant.variable}>
       <body>{children}</body>

@@ -58,7 +58,7 @@ export default function Chat() {
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
-  const [myBubble, setMyBubble] = useState("#c4a882");
+  const [myBubble, setMyBubble] = useState("#1a1a1a");
   const [caelBubble, setCaelBubble] = useState("#ffffff");
   const [bgUrl, setBgUrl] = useState("");
   const [bgOpacity, setBgOpacity] = useState(0.3);
@@ -80,7 +80,7 @@ export default function Chat() {
     setBaseUrl(localStorage.getItem("cael_base_url") || "https://az.zlapi.vip/v1");
     setModel(localStorage.getItem("cael_model") || "claude-opus-4-5");
     setSystemPrompt(localStorage.getItem("cael_prompt") || "");
-    setMyBubble(localStorage.getItem("cael_my_bubble") || "#c4a882");
+    setMyBubble(localStorage.getItem("cael_my_bubble") || "#1a1a1a");
     setCaelBubble(localStorage.getItem("cael_cael_bubble") || "#ffffff");
     setBgUrl(localStorage.getItem("cael_bg_url") || "");
     setBgOpacity(parseFloat(localStorage.getItem("cael_bg_opacity") || "0.3"));
@@ -350,13 +350,13 @@ export default function Chat() {
                     <div className="flex flex-col gap-2">
                       <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-gray-700 bg-white rounded-2xl px-4 py-3 border border-gray-200 outline-none resize-none" rows={3} />
                       <div className="flex gap-2">
-                        <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: myBubble }}>保存</button>
+                        <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: "#1a1a1a" }}>保存</button>
                         <button onClick={() => setEditingIdx(null)} className="text-xs text-gray-400 px-3 py-1.5 rounded-xl border border-gray-200">キャンセル</button>
                       </div>
                     </div>
                   ) : (
                     msg.content && (
-                      <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#2c2018", border: isUser ? "none" : "1px solid #f0ebe3" }}>
+                      <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#1a1a1a", border: isUser ? "none" : "1px solid #e5e5e5" }}>
                         {isRegenerating ? <span className="text-gray-400">...</span> : msg.content}
                       </div>
                     )
@@ -365,7 +365,7 @@ export default function Chat() {
               </div>
               <div className={`flex items-center gap-2 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                 {msg.created_at && <span className="text-xs text-gray-400">{formatTime(msg.created_at)}</span>}
-                {isUser && <span className="text-xs" style={{ color: isRead ? myBubble : "#c4b5a0" }}>{isRead ? "✓✓" : "✓"}</span>}
+                {isUser && <span className="text-xs" style={{ color: isRead ? myBubble : "#888888" }}>{isRead ? "✓✓" : "✓"}</span>}
                 {!isUser && !isEditing && (
                   <button onClick={() => regenerate(i)} className="text-gray-400"><ArrowPathIcon className="w-3 h-3" /></button>
                 )}
@@ -407,7 +407,7 @@ export default function Chat() {
             <PlusIcon className="w-5 h-5" />
           </button>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="メッセージ / 写点什么..." rows={1} className="flex-1 text-sm text-gray-700 bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200 resize-none outline-none" />
-          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl flex-shrink-0" style={{ backgroundColor: myBubble }}>送信</button>
+          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl flex-shrink-0" style={{ backgroundColor: "#1a1a1a" }}>送信</button>
         </div>
       </div>
     </div>

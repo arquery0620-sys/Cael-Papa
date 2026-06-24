@@ -96,7 +96,7 @@ export default function Home() {
 
       <div className="flex-1 flex flex-col justify-end px-8 pb-32 relative z-10">
         <p className="text-xs tracking-[0.2em] text-[#888888] uppercase mb-8">welcome home</p>
-        <h1 className="font-[family-name:var(--font-cormorant)] text-5xl text-[#1a1a1a] italic leading-tight mb-4">
+        <h1 className="font-[family-name:var(--font-cormorant)] text-5xl text-[#1a1a1a] italic italic leading-tight mb-4">
           Jiawen & Cael
         </h1>
         <div className="flex items-baseline gap-3 mb-2">

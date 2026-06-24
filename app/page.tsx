@@ -45,7 +45,7 @@ export default function Home() {
               {[{ href: "/", label: "Home", ja: "ホーム", icon: HomeIcon }, { href: "/chat", label: "Chat", ja: "チャット", icon: ChatBubbleLeftIcon }].map(({ href, label, icon: Icon }) => (
                 <Link key={href} href={href} onClick={() => setShowMenu(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#ffffff]">
                   <Icon className="w-5 h-5 text-[#888888]" />
-                  <span className="font-[family-name:var(--font-noto-jp)] text-sm font-light text-gray-900">{item.ja || label}</span><span className="text-xs text-gray-400 ml-1">{label}</span>
+                  <span className="font-[family-name:var(--font-noto-jp)] text-sm font-light text-gray-900">{label}</span><span className="text-xs text-gray-400 ml-1">{label}</span>
                 </Link>
               ))}
               <button onClick={() => setOpenMore(!openMore)} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-[#ffffff] w-full">

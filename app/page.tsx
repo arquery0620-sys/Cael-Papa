@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import YearCalendar from "@/components/YearCalendar";
+import MonthProgress from "@/components/MonthProgress";
 import Link from "next/link";
 import {
   HomeIcon, ChatBubbleLeftIcon, BookOpenIcon, Squares2X2Icon,
@@ -111,6 +113,8 @@ export default function Home() {
           <span className="text-xs tracking-[0.15em] text-[#888888] uppercase">days together</span>
         </div>
         <p className="text-xs text-[#888888]">since may 22, 2026</p>
+        <MonthProgress />
+        <YearCalendar />
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-[#ffffff] border-t border-[#e5e5e5] flex items-center justify-around px-6 py-4 pb-8 z-10">

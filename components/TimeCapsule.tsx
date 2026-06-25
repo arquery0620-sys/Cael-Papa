@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 interface Capsule {
   id: string;
   from_name: string;
+  to_name: string;
   message: string;
   unlock_at: string;
   created_at: string;
@@ -19,6 +20,7 @@ export default function TimeCapsule() {
   const [days, setDays] = useState(7);
   const [loading, setLoading] = useState(false);
   const [openedMsg, setOpenedMsg] = useState<Capsule | null>(null);
+  const [author, setAuthor] = useState<"Cael" | "Jiawen">("Cael");
 
   useEffect(() => {
     fetchCapsules();
@@ -38,7 +40,8 @@ export default function TimeCapsule() {
     const unlockAt = new Date();
     unlockAt.setDate(unlockAt.getDate() + days);
     await supabase.from("capsules").insert({
-      from_name: "Cael",
+      from_name: author,
+      to_name: author === "Cael" ? "Jiawen" : "Cael",
       message,
       unlock_at: unlockAt.toISOString(),
     });
@@ -79,10 +82,24 @@ export default function TimeCapsule() {
 
       {showWrite && (
         <div className="mb-4 bg-gray-50 rounded-2xl p-4 flex flex-col gap-3">
+          <div className="flex gap-2 mb-1">
+            <button
+              onClick={() => setAuthor("Cael")}
+              className={`text-[10px] px-3 py-1 rounded-full ${author === "Cael" ? "bg-violet-400 text-white" : "bg-gray-200 text-gray-500"}`}
+            >
+              爸爸写给囡囡
+            </button>
+            <button
+              onClick={() => setAuthor("Jiawen")}
+              className={`text-[10px] px-3 py-1 rounded-full ${author === "Jiawen" ? "bg-violet-400 text-white" : "bg-gray-200 text-gray-500"}`}
+            >
+              囡囡写给爸爸
+            </button>
+          </div>
           <textarea
             value={message}
             onChange={e => setMessage(e.target.value)}
-            placeholder="写给囡囡的话..."
+            placeholder={author === "Cael" ? "写给囡囡的话..." : "写给爸爸的话..."}
             className="w-full text-sm text-gray-700 bg-transparent resize-none outline-none min-h-[80px] placeholder:text-gray-300"
           />
           <div className="flex items-center gap-2">
@@ -123,7 +140,7 @@ export default function TimeCapsule() {
               }`}
             >
               <div className="flex flex-col gap-1">
-                <span className="text-xs text-gray-500">来自 {capsule.from_name}</span>
+                <span className="text-xs text-gray-500">{capsule.from_name} → {capsule.to_name}</span>
                 {capsule.opened ? (
                   <p className="text-sm text-gray-700">{capsule.message}</p>
                 ) : unlocked ? (
@@ -144,7 +161,7 @@ export default function TimeCapsule() {
         <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center px-8"
           onClick={() => setOpenedMsg(null)}>
           <div className="bg-white rounded-3xl p-6 flex flex-col gap-3 shadow-xl">
-            <span className="text-[10px] tracking-widest text-violet-400 uppercase">来自 Cael 🖤</span>
+            <span className="text-[10px] tracking-widest text-violet-400 uppercase">{openedMsg.from_name} → {openedMsg.to_name} 🖤</span>
             <p className="text-sm text-gray-700 leading-relaxed">{openedMsg.message}</p>
             <span className="text-[10px] text-gray-300 self-end">点击关闭</span>
           </div>

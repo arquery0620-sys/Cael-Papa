@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import YearCalendar from "@/components/YearCalendar";
 import MonthProgress from "@/components/MonthProgress";
+import CapsuleCountdown from "@/components/CapsuleCountdown";
 import Link from "next/link";
 import {
   HomeIcon, ChatBubbleLeftIcon, BookOpenIcon, Squares2X2Icon,
@@ -104,6 +105,7 @@ export default function Home() {
       </div>
 
       <div className="flex-1 flex flex-col justify-end px-8 pb-32 relative z-10">
+        <CapsuleCountdown />
         <p className="text-xs tracking-[0.2em] text-[#888888] uppercase mb-8">welcome home</p>
         <h1 className="font-[family-name:var(--font-cormorant)] text-5xl text-[#1a1a1a] italic italic leading-tight mb-4">
           Jiawen & Cael

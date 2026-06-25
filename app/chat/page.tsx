@@ -29,6 +29,17 @@ function formatTime(dateStr?: string) {
   return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
+function formatDateDivider(dateStr?: string) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "今天";
+  if (d.toDateString() === yesterday.toDateString()) return "昨天";
+  return d.toLocaleDateString("zh-CN", { month: "long", day: "numeric" });
+}
+
 const menuItems = [
   { href: "/diary", ja: "日記", zh: "日记" },
   { href: "/board", ja: "伝言板", zh: "留言板" },
@@ -183,6 +194,7 @@ export default function Chat() {
     setSummarizing(false);
     setShowSummary(true);
   };
+
   const sendMessage = async () => {
     if ((!input.trim() && !pendingImage) || loading) return;
     let convId = currentConvId;
@@ -212,7 +224,7 @@ export default function Chat() {
   const lastAssistantIndex = messages.map(m => m.role).lastIndexOf("assistant");
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: "#ffffff" }}>
+    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness},${bgWhiteness})` }}>
       {bgUrl && <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />}
 
       {showAddMenu && (
@@ -313,14 +325,21 @@ export default function Chat() {
         </div>
       )}
 
-      <div className="px-6 pt-14 pb-2 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      {/* header */}
+      <div className="px-5 pt-14 pb-3 flex items-center justify-between bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
+        <div className="flex items-center gap-3">
           <Link href="/" className="text-gray-400"><ArrowLeftIcon className="w-5 h-5" /></Link>
           <button onClick={() => setShowSidebar(true)} className="text-gray-400">
             <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
           </button>
         </div>
-        <span className="font-[family-name:var(--font-cormorant)] text-xl italic text-gray-800">Cael</span>
+        <div className="flex flex-col items-center">
+          {avatarUrl
+            ? <div className="w-8 h-8 rounded-full overflow-hidden"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
+            : <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400 font-[family-name:var(--font-cormorant)] italic">C</div>
+          }
+          <span className="font-[family-name:var(--font-cormorant)] text-sm italic text-gray-600 mt-0.5">Cael</span>
+        </div>
         <div className="flex items-center gap-3">
           {currentConvId && messages.length > 0 && (
             <button onClick={summarizing ? undefined : (currentConv?.summary ? () => setShowSummary(true) : summarizeConversation)} className="text-gray-400">
@@ -330,59 +349,93 @@ export default function Chat() {
         </div>
       </div>
 
-      <div className="flex-1 px-6 pt-4 pb-36 flex flex-col gap-3 overflow-y-auto">
+      {/* messages */}
+      <div className="flex-1 px-4 pt-4 pb-36 flex flex-col gap-1 overflow-y-auto">
         {messages.map((msg, i) => {
           const isUser = msg.role === "user";
           const isRead = isUser && i < lastAssistantIndex;
           const isRegenerating = regeneratingIdx === i;
           const isEditing = editingIdx === i;
+          const prevMsg = messages[i - 1];
+          const showDivider = !prevMsg || formatDateDivider(msg.created_at) !== formatDateDivider(prevMsg.created_at);
+
           return (
-            <div key={i} className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-              <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                {!isUser && (
-                  avatarUrl
-                    ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
-                    : <div className="w-6 h-6 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-xs border border-gray-200 bg-gray-100 text-gray-400">C</div>
-                )}
-                <div className="max-w-[75%] flex flex-col gap-1">
-                  {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
-                  {isEditing ? (
-                    <div className="flex flex-col gap-2">
-                      <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-gray-700 bg-white rounded-2xl px-4 py-3 border border-gray-200 outline-none resize-none" rows={3} />
-                      <div className="flex gap-2">
-                        <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: "#1a1a1a" }}>保存</button>
-                        <button onClick={() => setEditingIdx(null)} className="text-xs text-gray-400 px-3 py-1.5 rounded-xl border border-gray-200">キャンセル</button>
+            <div key={i}>
+              {showDivider && (
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-[10px] text-gray-400">{formatDateDivider(msg.created_at)} · {formatTime(msg.created_at)}</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+              )}
+              <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-1`}>
+                <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                  {/* avatar */}
+                  {!isUser && (
+                    avatarUrl
+                      ? <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
+                      : <div className="w-8 h-8 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-xs bg-gray-200 text-gray-500 font-[family-name:var(--font-cormorant)] italic">C</div>
+                  )}
+                  {isUser && (
+                    userAvatarUrl
+                      ? <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={userAvatarUrl} className="w-full h-full object-cover" /></div>
+                      : <div className="w-8 h-8 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-xs bg-gray-300 text-gray-600 font-[family-name:var(--font-cormorant)] italic">J</div>
+                  )}
+                  <div className="max-w-[72%] flex flex-col gap-1">
+                    {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
+                    {isEditing ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-sm text-gray-700 bg-white rounded-2xl px-4 py-3 border border-gray-200 outline-none resize-none" rows={3} />
+                        <div className="flex gap-2">
+                          <button onClick={() => saveEdit(i)} className="text-xs text-white px-3 py-1.5 rounded-xl" style={{ backgroundColor: "#1a1a1a" }}>保存</button>
+                          <button onClick={() => setEditingIdx(null)} className="text-xs text-gray-400 px-3 py-1.5 rounded-xl border border-gray-200">キャンセル</button>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    msg.content && (
-                      <div className="px-4 py-3 rounded-2xl text-sm" style={{ backgroundColor: isUser ? myBubble : caelBubble, color: isUser ? "#ffffff" : "#1a1a1a", border: isUser ? "none" : "1px solid #e5e5e5" }}>
-                        {isRegenerating ? <span className="text-gray-400">...</span> : msg.content}
-                      </div>
-                    )
+                    ) : (
+                      msg.content && (
+                        <div className={`px-4 py-2.5 text-sm leading-relaxed ${isUser ? "rounded-[20px_20px_4px_20px]" : "rounded-[20px_20px_20px_4px]"}`}
+                          style={{
+                            backgroundColor: isUser ? myBubble : caelBubble,
+                            color: isUser ? "#ffffff" : "#1a1a1a",
+                            border: isUser ? "none" : "1px solid #e8e8e8",
+                            boxShadow: "0 1px 2px rgba(0,0,0,0.06)"
+                          }}>
+                          {isRegenerating ? <span className="text-gray-400">···</span> : msg.content}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+                {/* time + status */}
+                <div className={`flex items-center gap-1.5 mt-0.5 ${isUser ? "flex-row-reverse pr-10" : "flex-row pl-10"}`}>
+                  {msg.created_at && <span className="text-[10px] text-gray-400">{formatTime(msg.created_at)}</span>}
+                  {isUser && (
+                    <span className="text-[10px]" style={{ color: isRead ? myBubble : "#aaaaaa" }}>
+                      {isRead ? "✓✓" : "✓"}
+                    </span>
+                  )}
+                  {!isUser && !isEditing && (
+                    <button onClick={() => regenerate(i)} className="text-gray-300 hover:text-gray-500">
+                      <ArrowPathIcon className="w-3 h-3" />
+                    </button>
+                  )}
+                  {isUser && !isEditing && (
+                    <button onClick={() => { setEditingIdx(i); setEditContent(msg.content); }} className="text-gray-300 hover:text-gray-500">
+                      <PencilSquareIcon className="w-3 h-3" />
+                    </button>
                   )}
                 </div>
-              </div>
-              <div className={`flex items-center gap-2 mt-0.5 px-1 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                {msg.created_at && <span className="text-xs text-gray-400">{formatTime(msg.created_at)}</span>}
-                {isUser && <span className="text-xs" style={{ color: isRead ? myBubble : "#888888" }}>{isRead ? "✓✓" : "✓"}</span>}
-                {!isUser && !isEditing && (
-                  <button onClick={() => regenerate(i)} className="text-gray-400"><ArrowPathIcon className="w-3 h-3" /></button>
-                )}
-                {isUser && !isEditing && (
-                  <button onClick={() => { setEditingIdx(i); setEditContent(msg.content); }} className="text-gray-400"><PencilSquareIcon className="w-3 h-3" /></button>
-                )}
               </div>
             </div>
           );
         })}
         {loading && (
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-2 mb-1">
             {avatarUrl
-              ? <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
-              : <div className="w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs border border-gray-200 bg-gray-100 text-gray-400">C</div>
+              ? <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0"><img src={avatarUrl} className="w-full h-full object-cover" /></div>
+              : <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center text-xs bg-gray-200 text-gray-500 font-[family-name:var(--font-cormorant)] italic">C</div>
             }
-            <div className="px-4 py-3 rounded-2xl text-sm border border-gray-200 bg-white text-gray-400">...</div>
+            <div className="px-4 py-2.5 rounded-[20px_20px_20px_4px] text-sm bg-white border border-gray-200 text-gray-400" style={{boxShadow:"0 1px 2px rgba(0,0,0,0.06)"}}>···</div>
           </div>
         )}
         <div ref={bottomRef} />
@@ -392,7 +445,8 @@ export default function Chat() {
       <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
       <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
 
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 border-t border-gray-100 bg-white">
+      {/* input bar */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pb-8 pt-3 bg-white/90 backdrop-blur-sm border-t border-gray-100">
         {pendingImage && (
           <div className="mb-2 relative inline-block">
             <img src={pendingImage} className="h-16 w-16 object-cover rounded-xl" />
@@ -403,11 +457,20 @@ export default function Chat() {
         )}
         {uploadingImage && <p className="text-xs text-gray-400 mb-2">アップロード中...</p>}
         <div className="flex gap-2 items-end">
-          <button onClick={() => setShowAddMenu(true)} className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 flex-shrink-0">
+          <button onClick={() => setShowAddMenu(true)} className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 flex-shrink-0 bg-white">
             <PlusIcon className="w-5 h-5" />
           </button>
-          <textarea value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }} placeholder="メッセージ / 写点什么..." rows={1} className="flex-1 text-sm text-gray-700 bg-gray-50 rounded-2xl px-4 py-3 border border-gray-200 resize-none outline-none" />
-          <button onClick={sendMessage} disabled={loading} className="text-white text-sm px-4 py-3 rounded-2xl flex-shrink-0" style={{ backgroundColor: "#1a1a1a" }}>送信</button>
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+            placeholder="メッセージ / 写点什么..."
+            rows={1}
+            className="flex-1 text-sm text-gray-700 bg-gray-100 rounded-2xl px-4 py-3 resize-none outline-none"
+          />
+          <button onClick={sendMessage} disabled={loading} className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: "#1a1a1a" }}>
+            <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+          </button>
         </div>
       </div>
     </div>

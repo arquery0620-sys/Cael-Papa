@@ -11,6 +11,8 @@ export default function Tune() {
   const [bgOpacity, setBgOpacity] = useState(0.3);
   const [bgWhiteness, setBgWhiteness] = useState(100);
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [userAvatarUrl, setUserAvatarUrl] = useState("");
+  const userAvatarRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const bgRef = useRef<HTMLInputElement>(null);
@@ -24,6 +26,7 @@ export default function Tune() {
     setBgOpacity(parseFloat(localStorage.getItem("cael_bg_opacity") || "0.3"));
     setBgWhiteness(parseInt(localStorage.getItem("cael_bg_whiteness") || "100"));
     setAvatarUrl(localStorage.getItem("cael_avatar_url") || "");
+    setUserAvatarUrl(localStorage.getItem("cael_user_avatar_url") || "");
   }, []);
 
   const handleSave = () => {
@@ -34,6 +37,7 @@ export default function Tune() {
     localStorage.setItem("cael_bg_opacity", bgOpacity.toString());
     localStorage.setItem("cael_bg_whiteness", bgWhiteness.toString());
     localStorage.setItem("cael_avatar_url", avatarUrl);
+    localStorage.setItem("cael_user_avatar_url", userAvatarUrl);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -59,6 +63,13 @@ export default function Tune() {
     if (!file) return;
     const url = await uploadFile(file, `avatar/${Date.now()}-${file.name}`);
     if (url) setAvatarUrl(url);
+  };
+
+  const handleUserAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadFile(file, `user-avatar/${Date.now()}-${file.name}`);
+    if (url) setUserAvatarUrl(url);
   };
 
   const ColorRow = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
@@ -148,6 +159,25 @@ export default function Tune() {
               <p className="text-xs text-[#888888]">auto syncs to chat</p>
             </div>
             <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+          </div>
+        </div>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-[#e5e5e5]">
+          <p className="text-xs text-[#888888] tracking-widest uppercase mb-3">My Avatar (Jiawen)</p>
+          <div className="flex items-center gap-4">
+            {userAvatarUrl ? (
+              <div className="w-14 h-14 rounded-full overflow-hidden border border-[#e5e5e5]">
+                <img src={userAvatarUrl} className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-[#ffffff] border border-[#e5e5e5] flex items-center justify-center font-[family-name:var(--font-cormorant)] text-xl italic text-[#888888]">J</div>
+            )}
+            <div className="flex flex-col gap-2">
+              <button onClick={() => userAvatarRef.current?.click()} disabled={uploading} className="text-xs text-[#1a1a1a] border border-[#1a1a1a] px-3 py-1.5 rounded-xl">
+                {uploading ? "Uploading..." : "Choose photo"}
+              </button>
+              <p className="text-xs text-[#888888]">auto syncs to chat</p>
+            </div>
+            <input ref={userAvatarRef} type="file" accept="image/*" className="hidden" onChange={handleUserAvatarUpload} />
           </div>
         </div>
 

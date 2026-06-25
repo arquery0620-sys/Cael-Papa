@@ -26,7 +26,11 @@ interface Conversation {
 function formatTime(dateStr?: string) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
-  return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  if (isToday) return time;
+  return `${d.getMonth()+1}/${d.getDate()} ${time}`;
 }
 
 function formatDateDivider(dateStr?: string) {
@@ -224,7 +228,7 @@ export default function Chat() {
   const lastAssistantIndex = messages.map(m => m.role).lastIndexOf("assistant");
 
   return (
-    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: `rgb(${bgWhiteness},${bgWhiteness},${bgWhiteness})` }}>
+    <div className="min-h-screen flex flex-col relative" style={{ backgroundColor: "#ffffff" }}>
       {bgUrl && <div className="fixed inset-0 -z-10" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center", opacity: bgOpacity }} />}
 
       {showAddMenu && (
@@ -362,12 +366,9 @@ export default function Chat() {
           return (
             <div key={i}>
               {showDivider && (
-                <div className="flex items-center gap-3 my-3">
-                  <div className="flex-1 h-px bg-gray-200" />
+                <div className="flex justify-center my-3">
                   <span className="text-[10px] text-gray-400">{formatDateDivider(msg.created_at)} · {formatTime(msg.created_at)}</span>
-                  <div className="flex-1 h-px bg-gray-200" />
-                </div>
-              )}
+                </div>              )}
               <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-1`}>
                 <div className={`flex items-end gap-2 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                   {/* avatar */}
@@ -408,7 +409,7 @@ export default function Chat() {
                 </div>
                 {/* time + status */}
                 <div className={`flex items-center gap-1.5 mt-0.5 ${isUser ? "flex-row-reverse pr-10" : "flex-row pl-10"}`}>
-                  {msg.created_at && <span className="text-[10px] text-gray-400">{formatTime(msg.created_at)}</span>}
+                  {msg.created_at && <span className="text-[10px] text-gray-400">{formatTime(msg.created_at)}{!isUser && " ☁︎"}</span>}
                   {isUser && (
                     <span className="text-[10px]" style={{ color: isRead ? myBubble : "#aaaaaa" }}>
                       {isRead ? "✓✓" : "✓"}

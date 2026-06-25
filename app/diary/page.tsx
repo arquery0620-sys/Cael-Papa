@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import TimeCapsule from "@/components/TimeCapsule";
 
 interface Diary {
   id: string;
@@ -88,6 +89,6 @@ export default function Diary() {
           </div>
         ))}
       </div>
-    </div>
+    <TimeCapsule />    </div>
   );
 }

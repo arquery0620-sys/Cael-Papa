@@ -5,6 +5,7 @@ export default function Settings() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState("claude-opus-4-5");
   const [apiKey, setApiKey] = useState("");
+  const [showKey, setShowKey] = useState(false);
   const [baseUrl, setBaseUrl] = useState("https://az.zlapi.vip/v1");
   const [replyLength, setReplyLength] = useState("normal");
   const [saved, setSaved] = useState(false);
@@ -49,7 +50,10 @@ export default function Settings() {
         </div>
         <div className="bg-white rounded-2xl p-5 border border-[#e5e5e5]">
           <p className="text-xs text-[#888888] tracking-widest uppercase mb-2">API Key</p>
-          <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-..." type="password" className="w-full text-sm text-[#1a1a1a] bg-[#ffffff] rounded-xl p-3 border border-[#e5e5e5] outline-none" />
+          <div className="relative">
+          <input value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-..." type={showKey ? "text" : "password"} className="w-full text-sm text-[#1a1a1a] bg-[#ffffff] rounded-xl p-3 border border-[#e5e5e5] outline-none" />
+          <button onClick={() => setShowKey(!showKey)} className="absolute right-3 top-3 text-xs text-gray-400">{showKey ? "隐藏" : "显示"}</button>
+          </div>
         </div>
         <div className="bg-white rounded-2xl p-5 border border-[#e5e5e5]">
           <p className="text-xs text-[#888888] tracking-widest uppercase mb-2">Reply Length</p>

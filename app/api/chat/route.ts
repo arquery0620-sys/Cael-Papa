@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     } catch {}
     // 判断是否需要搜索
     let searchResults = "";
-    const needsSearch = /最新|最近|现在|今天|新闻|搜索|查一下|帮我找/.test(message);
+    const needsSearch = /最新|最近|现在|今天|新闻|搜索|查一下|帮我找/.test(message as string);
     if (needsSearch) {
       try {
         const searchRes = await fetch(`${process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "http://localhost:3000"}/api/search`, {

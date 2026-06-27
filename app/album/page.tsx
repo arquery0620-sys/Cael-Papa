@@ -44,6 +44,10 @@ export default function AlbumPage() {
   const [uploading, setUploading] = useState(false);
   const [note, setNote] = useState("");
   const [viewPhoto, setViewPhoto] = useState<Photo | null>(null);
+  const [editingAlbumName, setEditingAlbumName] = useState(false);
+  const [newAlbumNameEdit, setNewAlbumNameEdit] = useState("");
+  const [editingNote, setEditingNote] = useState(false);
+  const [newNote, setNewNote] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchAlbums(); }, []);
@@ -64,6 +68,21 @@ export default function AlbumPage() {
     setNewAlbumName("");
     setShowNewAlbum(false);
     await fetchAlbums();
+  };
+
+  const renameAlbum = async () => {
+    if (!currentAlbum || !newAlbumNameEdit.trim()) return;
+    await supabase.from("albums").update({ name: newAlbumNameEdit }).eq("id", currentAlbum.id);
+    setCurrentAlbum({ ...currentAlbum, name: newAlbumNameEdit });
+    setEditingAlbumName(false);
+    await fetchAlbums();
+  };
+
+  const updateNote = async (photo: Photo) => {
+    await supabase.from("album_photos").update({ note: newNote }).eq("id", photo.id);
+    setViewPhoto({ ...photo, note: newNote });
+    setEditingNote(false);
+    await fetchPhotos(currentAlbum!.id);
   };
 
   const uploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +113,11 @@ export default function AlbumPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <div className="px-6 pt-14 pb-3 flex items-center justify-between border-b border-gray-100">
         <button onClick={() => { setCurrentAlbum(null); setPhotos([]); }} className="text-gray-400 text-sm">← 返回</button>
-        <span className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-800">{currentAlbum.name}</span>
+        {editingAlbumName ? (
+          <input autoFocus value={newAlbumNameEdit} onChange={e => setNewAlbumNameEdit(e.target.value)} onBlur={renameAlbum} onKeyDown={e => e.key === "Enter" && renameAlbum()} className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-800 outline-none border-b border-gray-300 text-center" />
+        ) : (
+          <span onClick={() => { setEditingAlbumName(true); setNewAlbumNameEdit(currentAlbum.name); }} className="font-[family-name:var(--font-cormorant)] text-lg italic text-gray-800 cursor-pointer">{currentAlbum.name}</span>
+        )}
         <button onClick={() => fileRef.current?.click()} className="text-[10px] text-violet-400">+ 添加</button>
       </div>
       <div className="px-4 py-3">
@@ -116,8 +139,17 @@ export default function AlbumPage() {
           <div className="flex-1 flex items-center justify-center p-4">
             <img src={viewPhoto.image_url} className="max-w-full max-h-full object-contain rounded-xl" />
           </div>
-          {viewPhoto.note && <p className="text-center text-white text-sm pb-4 px-8">{viewPhoto.note}</p>}
-          <div className="flex justify-center pb-8 gap-6" onClick={e => e.stopPropagation()}>
+          {editingNote ? (
+            <div className="px-8 pb-4" onClick={e => e.stopPropagation()}>
+              <input autoFocus value={newNote} onChange={e => setNewNote(e.target.value)} onBlur={() => updateNote(viewPhoto)} onKeyDown={e => e.key === "Enter" && updateNote(viewPhoto)} className="w-full text-center text-white text-sm bg-transparent border-b border-white/40 outline-none pb-1" />
+            </div>
+          ) : (
+            <p onClick={e => { e.stopPropagation(); setEditingNote(true); setNewNote(viewPhoto.note || ""); }} className="text-center text-white/70 text-sm pb-4 px-8 cursor-pointer">
+              {viewPhoto.note || "点击添加备注..."}
+            </p>
+          )}
+          <div className="flex justify-center pb-8 gap-4" onClick={e => e.stopPropagation()}>
+            <button onClick={() => { navigator.clipboard.writeText(viewPhoto.image_url); alert("图片链接已复制，可粘贴到 chat 发给囡囡🖤"); }} className="text-xs text-violet-300 border border-violet-300 px-4 py-2 rounded-full">发给囡囡</button>
             <button onClick={() => deletePhoto(viewPhoto)} className="text-xs text-red-400 border border-red-400 px-4 py-2 rounded-full">删除</button>
           </div>
         </div>

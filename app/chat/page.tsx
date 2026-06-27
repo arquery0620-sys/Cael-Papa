@@ -123,7 +123,7 @@ export default function Chat() {
   };
 
   const fetchMessages = async (convId: string) => {
-    const { data } = await supabase.from("messages").select("*").eq("conversation_id", convId).order("created_at");
+    const { data } = await supabase.from("messages").select("*").eq("conversation_id", convId).order("created_at").limit(150);
     if (data) setMessages(data);
   };
 

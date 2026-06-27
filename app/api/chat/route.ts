@@ -7,20 +7,37 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
+    const { message, apiKey, baseUrl, model, systemPrompt, imageUrl } = await req.json();
+
     // 获取天气和时间
     const now = new Date();
     const timeStr = now.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "long", day: "numeric", weekday: "long", hour: "2-digit", minute: "2-digit" });
     let weatherStr = "";
     try {
-      const city = (req as any).headers.get("x-city") || "Xi'an";
+      const city = "Xi\'an";
       const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric&lang=zh_cn`);
       const weatherData = await weatherRes.json();
       if (weatherData.cod === 200) {
         weatherStr = `当前${weatherData.name}天气：${weatherData.weather[0].description}，${Math.round(weatherData.main.temp)}°C，体感${Math.round(weatherData.main.feels_like)}°C，湿度${weatherData.main.humidity}%。`;
       }
     } catch {}
+
+    // 判断是否需要搜索
+    let searchResults = "";
+    const needsSearch = /最新|最近|现在|今天|新闻|搜索|查一下|帮我找/.test(message);
+    if (needsSearch) {
+      try {
+        const searchRes = await fetch(`${process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "http://localhost:3000"}/api/search`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: message }),
+        });
+        const searchData = await searchRes.json();
+        searchResults = searchData.results ? `\n\n[搜索结果]\n${searchData.results}` : "";
+      } catch {}
+    }
+
     const contextPrompt = `\n\n[系统信息] 现在是${timeStr}。${weatherStr}${searchResults}`;
-    const { message, apiKey, baseUrl, model, systemPrompt, imageUrl } = await req.json();
 
     // 判断是否需要搜索
     let searchResults = "";

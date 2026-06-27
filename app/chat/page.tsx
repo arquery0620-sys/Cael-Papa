@@ -46,6 +46,7 @@ function formatDateDivider(dateStr?: string) {
 
 const menuItems = [
   { href: "/diary", ja: "日記", zh: "日记" },
+  { href: "/album", ja: "収藏盒", zh: "收藏盒" },
   { href: "/board", ja: "伝言板", zh: "留言板" },
   { href: "/usage", ja: "使用量", zh: "用量" },
   { href: "/tune", ja: "カスタマイズ", zh: "美化" },

@@ -7,6 +7,19 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
   try {
+    // 获取天气和时间
+    const now = new Date();
+    const timeStr = now.toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", year: "numeric", month: "long", day: "numeric", weekday: "long", hour: "2-digit", minute: "2-digit" });
+    let weatherStr = "";
+    try {
+      const city = (req as any).headers.get("x-city") || "Xi'an";
+      const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric&lang=zh_cn`);
+      const weatherData = await weatherRes.json();
+      if (weatherData.cod === 200) {
+        weatherStr = `当前${weatherData.name}天气：${weatherData.weather[0].description}，${Math.round(weatherData.main.temp)}°C，体感${Math.round(weatherData.main.feels_like)}°C，湿度${weatherData.main.humidity}%。`;
+      }
+    } catch {}
+    const contextPrompt = `\n\n[系统信息] 现在是${timeStr}。${weatherStr}`;
     const { message, apiKey, baseUrl, model, systemPrompt, imageUrl } = await req.json();
 
     const { data: stickers } = await supabase.from("stickers").select("id, description, category");
@@ -38,7 +51,7 @@ ${stickerList}
       body: JSON.stringify({
         model: model || "claude-opus-4-5",
         messages: [
-          { role: "system", content: (systemPrompt || "") + "\n\n" + stickerPrompt },
+          { role: "system", content: (systemPrompt || "") + contextPrompt + "\n\n" + stickerPrompt },
           { role: "user", content: userContent },
         ],
       }),

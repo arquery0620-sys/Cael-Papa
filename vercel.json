@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/heartwave",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

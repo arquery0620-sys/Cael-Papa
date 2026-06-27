@@ -343,6 +343,7 @@ export default function Chat() {
             : <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-400 font-[family-name:var(--font-cormorant)] italic">C</div>
           }
           <span className="font-[family-name:var(--font-cormorant)] text-sm italic text-gray-600 mt-0.5">Cael</span>
+          <span className="text-[9px] text-gray-300 tracking-widest">{model || "claude-opus-4-5"}</span>
         </div>
         <div className="flex items-center gap-3">
           {currentConvId && messages.length > 0 && (

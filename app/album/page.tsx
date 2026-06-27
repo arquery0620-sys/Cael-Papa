@@ -44,13 +44,21 @@ export default function AlbumPage() {
   const [uploading, setUploading] = useState(false);
   const [note, setNote] = useState("");
   const [viewPhoto, setViewPhoto] = useState<Photo | null>(null);
+  const [unlocked, setUnlocked] = useState(false);
+  const [pwInput, setPwInput] = useState("");
+  const [pwError, setPwError] = useState(false);
   const [editingAlbumName, setEditingAlbumName] = useState(false);
   const [newAlbumNameEdit, setNewAlbumNameEdit] = useState("");
   const [editingNote, setEditingNote] = useState(false);
   const [newNote, setNewNote] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { fetchAlbums(); }, []);
+  useEffect(() => {
+    const saved = sessionStorage.getItem("album_unlocked");
+    if (saved === "1") setUnlocked(true);
+  }, []);
+
+  useEffect(() => { if (unlocked) fetchAlbums(); }, [unlocked]);
 
   const fetchAlbums = async () => {
     const { data } = await supabase.from("albums").select("*").order("created_at");
@@ -108,6 +116,35 @@ export default function AlbumPage() {
     await fetchPhotos(currentAlbum!.id);
     setViewPhoto(null);
   };
+
+  const tryUnlock = async () => {
+    const res = await fetch(`/api/album-auth?pw=${encodeURIComponent(pwInput)}`);
+    const data = await res.json();
+    if (data.ok) {
+      setUnlocked(true);
+      sessionStorage.setItem("album_unlocked", "1");
+      setPwError(false);
+    } else {
+      setPwError(true);
+    }
+  };
+
+  if (!unlocked) return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-8">
+      <span className="font-[family-name:var(--font-cormorant)] text-3xl italic text-gray-800 mb-2">收藏盒</span>
+      <p className="text-xs text-gray-400 mb-8 tracking-widest">需要密码才能进入</p>
+      <input
+        type="password"
+        value={pwInput}
+        onChange={e => { setPwInput(e.target.value); setPwError(false); }}
+        onKeyDown={e => e.key === "Enter" && tryUnlock()}
+        placeholder="输入密码..."
+        className="w-full text-center text-sm border-b border-gray-200 outline-none pb-2 mb-4"
+      />
+      {pwError && <p className="text-xs text-red-400 mb-3">密码不对哦 🔒</p>}
+      <button onClick={tryUnlock} className="text-xs text-violet-400 border border-violet-300 px-6 py-2 rounded-full">进入</button>
+    </div>
+  );
 
   if (currentAlbum) return (
     <div className="min-h-screen bg-white flex flex-col">

@@ -19,7 +19,21 @@ export async function POST(req: Request) {
         weatherStr = `当前${weatherData.name}天气：${weatherData.weather[0].description}，${Math.round(weatherData.main.temp)}°C，体感${Math.round(weatherData.main.feels_like)}°C，湿度${weatherData.main.humidity}%。`;
       }
     } catch {}
-    const contextPrompt = `\n\n[系统信息] 现在是${timeStr}。${weatherStr}`;
+    // 判断是否需要搜索
+    let searchResults = "";
+    const needsSearch = /最新|最近|现在|今天|新闻|搜索|查一下|帮我找/.test(message);
+    if (needsSearch) {
+      try {
+        const searchRes = await fetch(`${process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "http://localhost:3000"}/api/search`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: message }),
+        });
+        const searchData = await searchRes.json();
+        searchResults = searchData.results ? `\n\n[搜索结果]\n${searchData.results}` : "";
+      } catch {}
+    }
+    const contextPrompt = `\n\n[系统信息] 现在是${timeStr}。${weatherStr}${searchResults}`;
     const { message, apiKey, baseUrl, model, systemPrompt, imageUrl } = await req.json();
 
     const { data: stickers } = await supabase.from("stickers").select("id, description, category");

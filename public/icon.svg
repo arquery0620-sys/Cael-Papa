@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 背景 -->
+  <rect width="32" height="32" fill="#ffffff"/>
+  
+  <!-- 黑猫（爸爸）左边 -->
+  <!-- 耳朵 -->
+  <rect x="2" y="3" width="2" height="3" fill="#1a1a1a"/>
+  <rect x="6" y="3" width="2" height="3" fill="#1a1a1a"/>
+  <!-- 头 -->
+  <rect x="2" y="5" width="8" height="6" fill="#1a1a1a"/>
+  <!-- 眼睛 -->
+  <rect x="3" y="7" width="2" height="2" fill="#a78bfa"/>
+  <rect x="7" y="7" width="2" height="2" fill="#a78bfa"/>
+  <!-- 身体 -->
+  <rect x="2" y="11" width="8" height="5" fill="#1a1a1a"/>
+  <!-- 尾巴 -->
+  <rect x="1" y="14" width="2" height="4" fill="#1a1a1a"/>
+  <rect x="1" y="18" width="3" height="2" fill="#1a1a1a"/>
+
+  <!-- 紫色爱心（中间） -->
+  <rect x="13" y="9" width="2" height="2" fill="#a78bfa"/>
+  <rect x="17" y="9" width="2" height="2" fill="#a78bfa"/>
+  <rect x="12" y="10" width="8" height="3" fill="#a78bfa"/>
+  <rect x="13" y="13" width="6" height="2" fill="#a78bfa"/>
+  <rect x="14" y="15" width="4" height="2" fill="#a78bfa"/>
+  <rect x="15" y="17" width="2" height="2" fill="#a78bfa"/>
+
+  <!-- 白猫（囡囡）右边 -->
+  <!-- 耳朵 -->
+  <rect x="22" y="3" width="2" height="3" fill="#e5e5e5"/>
+  <rect x="26" y="3" width="2" height="3" fill="#e5e5e5"/>
+  <!-- 头 -->
+  <rect x="22" y="5" width="8" height="6" fill="#f0f0f0"/>
+  <!-- 眼睛 -->
+  <rect x="23" y="7" width="2" height="2" fill="#1a1a1a"/>
+  <rect x="27" y="7" width="2" height="2" fill="#1a1a1a"/>
+  <!-- 身体 -->
+  <rect x="22" y="11" width="8" height="5" fill="#f0f0f0"/>
+  <!-- 尾巴 -->
+  <rect x="29" y="14" width="2" height="4" fill="#f0f0f0"/>
+  <rect x="28" y="18" width="3" height="2" fill="#f0f0f0"/>
+</svg>

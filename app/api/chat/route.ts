@@ -25,7 +25,7 @@ export async function POST(req: Request) {
 
     // 搜索
     let searchResults = "";
-    const needsSearch = /最新|最近|新闻|搜索|查一下|帮我找/.test(message);
+    const needsSearch = true;
     if (needsSearch) {
       try {
         const baseOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";

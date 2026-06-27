@@ -69,6 +69,8 @@ export default function Chat() {
   const [showSummary, setShowSummary] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [openChats, setOpenChats] = useState(true);
+  const [msgResults, setMsgResults] = useState<{id: string, content: string, role: string, created_at: string, conversation_id: string}[]>([]);
+  const [searching, setSearching] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [model, setModel] = useState("");
@@ -112,8 +114,14 @@ export default function Chat() {
   useEffect(() => {
     if (search.trim()) {
       setFiltered(conversations.filter(c => c.title.toLowerCase().includes(search.toLowerCase())));
+      setSearching(true);
+      fetch(`/api/search-messages?q=${encodeURIComponent(search)}`)
+        .then(r => r.json())
+        .then(d => { setMsgResults(d.results || []); setSearching(false); })
+        .catch(() => setSearching(false));
     } else {
       setFiltered(conversations);
+      setMsgResults([]);
     }
   }, [search, conversations]);
 
@@ -313,6 +321,17 @@ export default function Chat() {
               <MagnifyingGlassIcon className="w-3.5 h-3.5 text-gray-300" />
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="検索 / 搜索" className="flex-1 text-xs text-gray-600 bg-transparent outline-none" />
             </div>
+            {msgResults.length > 0 && (
+              <div className="px-3 py-2 border-t border-gray-100 max-h-48 overflow-y-auto">
+                <p className="text-[9px] text-gray-300 tracking-widest uppercase mb-2">消息结果</p>
+                {msgResults.map(r => (
+                  <div key={r.id} onClick={() => { const c = conversations.find(c => c.id === r.conversation_id); if(c) selectConversation(c); }} className="py-1.5 cursor-pointer">
+                    <p className="text-[10px] text-gray-400">{r.role === "user" ? "囡囡" : "Cael"}</p>
+                    <p className="text-xs text-gray-600 truncate">{r.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex-1 bg-black/20" onClick={() => setShowSidebar(false)} />
         </div>

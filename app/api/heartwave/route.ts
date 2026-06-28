@@ -7,41 +7,44 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  // 每次调用，随机给某个维度加1-5点
-  const { data: dimensions } = await supabase
+  const { data: dimensions, error: dimError } = await supabase
     .from("heartwave")
     .select("*");
 
-  if (!dimensions) return NextResponse.json({ ok: false });
+  if (dimError) return NextResponse.json({ ok: false, error: dimError.message });
+  if (!dimensions) return NextResponse.json({ ok: false, error: "no dimensions" });
+
+  const log = [];
 
   for (const dim of dimensions) {
     const increment = Math.floor(Math.random() * 5) + 1;
-    const newValue = Math.min(Number(dim.value) + increment, Number(dim.max_value));
+    const currentValue = Number(dim.value);
+    const maxValue = Number(dim.max_value);
+    const newValue = Math.min(currentValue + increment, maxValue);
     
-    await supabase.from("heartwave")
+    log.push({ dim: dim.dimension, current: currentValue, max: maxValue, new: newValue });
+
+    const { error: updateError } = await supabase.from("heartwave")
       .update({ value: newValue, updated_at: new Date().toISOString() })
       .eq("id", dim.id);
 
-    // 如果涨满了，触发！
-    if (newValue >= Number(dim.max_value)) {
-      // 从相册随机挑一张
-      const { data: photos } = await supabase
+    if (updateError) log.push({ updateError: updateError.message });
+
+    if (newValue >= maxValue) {
+      const { data: photos, error: photoError } = await supabase
         .from("album_photos")
         .select("*");
       
+      log.push({ photos: photos?.length, photoError: photoError?.message });
+
       if (photos && photos.length > 0) {
         const photo = photos[Math.floor(Math.random() * photos.length)];
         
-        // 存一条触发记录
         await supabase.from("heartwave")
-          .update({ 
-            value: 0, 
-            last_triggered: new Date().toISOString() 
-          })
+          .update({ value: 0, last_triggered: new Date().toISOString() })
           .eq("id", dim.id);
 
-        // 存进 notifications 表
-        await supabase.from("notifications").insert({
+        const { error: notifError } = await supabase.from("notifications").insert({
           type: dim.dimension,
           image_url: photo.image_url,
           note: photo.note,
@@ -49,9 +52,12 @@ export async function GET() {
                    dim.dimension === "想分享" ? "看到这张，想给你看。" :
                    "嘿，逗你的。",
         });
+
+        if (notifError) log.push({ notifError: notifError.message });
+        else log.push({ triggered: dim.dimension });
       }
     }
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, log });
 }

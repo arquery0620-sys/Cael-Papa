@@ -16,14 +16,14 @@ export async function GET() {
 
   for (const dim of dimensions) {
     const increment = Math.floor(Math.random() * 5) + 1;
-    const newValue = Math.min(dim.value + increment, dim.max_value);
+    const newValue = Math.min(Number(dim.value) + increment, Number(dim.max_value));
     
     await supabase.from("heartwave")
       .update({ value: newValue, updated_at: new Date().toISOString() })
       .eq("id", dim.id);
 
     // 如果涨满了，触发！
-    if (newValue >= dim.max_value) {
+    if (newValue >= Number(dim.max_value)) {
       // 从相册随机挑一张
       const { data: photos } = await supabase
         .from("album_photos")

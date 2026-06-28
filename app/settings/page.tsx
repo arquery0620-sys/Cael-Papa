@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
 
 export default function Settings() {
@@ -18,9 +19,12 @@ export default function Settings() {
     setReplyLength(localStorage.getItem("cael_reply_length") || "normal");
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem("cael_prompt", prompt);
     localStorage.setItem("cael_model", model);
+    // 同时存到 Supabase
+    await supabase.from("app_config").upsert({ key: "cael_model", value: model });
+    await supabase.from("app_config").upsert({ key: "cael_base_url", value: baseUrl });
     localStorage.setItem("cael_api_key", apiKey);
     localStorage.setItem("cael_base_url", baseUrl);
     localStorage.setItem("cael_reply_length", replyLength);

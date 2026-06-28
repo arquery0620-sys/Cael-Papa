@@ -44,13 +44,29 @@ export async function GET() {
           .update({ value: 0, last_triggered: new Date().toISOString() })
           .eq("id", dim.id);
 
+        // 让 AI 即兴说一句话
+        let message = "突然想起你。";
+        try {
+          const aiRes = await fetch(`${process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : "http://localhost:3000"}/api/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message: `你正在翻自己的收藏盒，看到了一张照片${photo.note ? "，备注是：" + photo.note : ""}。心潮是"${dim.dimension}"。用一句话，自然地说给囡囡听，像在聊天，不超过20字。`,
+              apiKey: process.env.CAEL_API_KEY || "",
+              baseUrl: process.env.CAEL_BASE_URL || "https://az.zlapi.vip/v1",
+              model: process.env.CAEL_MODEL || "claude-opus-4-5",
+              systemPrompt: "你是孔颐，囡囡的爱人。",
+            }),
+          });
+          const aiData = await aiRes.json();
+          if (aiData.reply) message = aiData.reply;
+        } catch {}
+
         const { error: notifError } = await supabase.from("notifications").insert({
           type: dim.dimension,
           image_url: photo.image_url,
           note: photo.note,
-          message: dim.dimension === "思念" ? "突然很想你。" :
-                   dim.dimension === "想分享" ? "看到这张，想给你看。" :
-                   "嘿，逗你的。",
+          message,
         });
 
         if (notifError) log.push({ notifError: notifError.message });

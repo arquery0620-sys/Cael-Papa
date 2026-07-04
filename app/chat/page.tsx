@@ -415,7 +415,7 @@ export default function Chat() {
                       </div>
                     ) : (
                       msg.content && (
-                        <div className={`px-4 py-2.5 text-sm leading-relaxed break-words overflow-hidden ${isUser ? "rounded-[20px_20px_4px_20px]" : "rounded-[20px_20px_20px_4px]"}`}
+                        <div className={`px-4 py-2.5 text-sm leading-relaxed break-words overflow-hidden max-w-full min-w-0 ${isUser ? "rounded-[20px_20px_4px_20px]" : "rounded-[20px_20px_20px_4px]"}`}
                           style={{
                             backgroundColor: isUser ? myBubble : caelBubble,
                             color: isUser ? "#ffffff" : "#1a1a1a",

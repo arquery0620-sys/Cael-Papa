@@ -25,6 +25,7 @@ export default function Settings() {
     // 同时存到 Supabase
     await supabase.from("app_config").upsert({ key: "cael_model", value: model });
     await supabase.from("app_config").upsert({ key: "cael_base_url", value: baseUrl });
+    await supabase.from("app_config").upsert({ key: "cael_api_key", value: apiKey });
     localStorage.setItem("cael_api_key", apiKey);
     localStorage.setItem("cael_base_url", baseUrl);
     localStorage.setItem("cael_reply_length", replyLength);

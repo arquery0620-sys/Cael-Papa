@@ -35,11 +35,11 @@ export default function BottomNav() {
         const isActive = pathname === item.href;
         if (item.isMain) {
           return (
-            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1 -mt-6">
-              <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-md ${isActive ? "bg-violet-500" : "bg-[#1a1a1a]"}`}>
+            <Link key={item.href} href={item.href} className="flex flex-col items-center gap-1">
+              <div className={isActive ? "bg-[#1a1a1a] p-2 rounded-full" : "p-2"} style={{ color: isActive ? "white" : "#888888" }}>
                 {item.icon}
               </div>
-              <span className="text-[10px] text-[#888888] tracking-wide">{item.label}</span>
+              <span className={`text-[10px] tracking-wide ${isActive ? "text-[#1a1a1a]" : "text-[#888888]"}`}>{item.label}</span>
             </Link>
           );
         }

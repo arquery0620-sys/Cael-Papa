@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import BottomNav from "@/components/BottomNav";
 import { Cormorant_Garamond, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
@@ -34,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ffffff" />
       </head>
-      <body style={{ backgroundColor: "#ffffff" }}>{children}</body>
+      <body style={{ backgroundColor: "#ffffff" }}>{children}<BottomNav /></body>
     </html>
   );
 }

@@ -403,7 +403,7 @@ export default function Chat() {
                       ? <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mb-1"><img src={userAvatarUrl} className="w-full h-full object-cover" /></div>
                       : <div className="w-8 h-8 rounded-full flex-shrink-0 mb-1 flex items-center justify-center text-xs bg-gray-300 text-gray-600 font-[family-name:var(--font-cormorant)] italic">J</div>
                   )}
-                  <div className="max-w-[72%] flex flex-col gap-1">
+                  <div className="max-w-[72%] overflow-hidden flex flex-col gap-1">
                     {msg.imageUrl && <img src={msg.imageUrl} className="max-w-full max-h-48 object-cover rounded-2xl" />}
                     {isEditing ? (
                       <div className="flex flex-col gap-2">

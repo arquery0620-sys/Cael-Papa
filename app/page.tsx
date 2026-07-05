@@ -120,6 +120,10 @@ export default function Home() {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-[#ffffff] border-t border-[#e5e5e5] flex items-center justify-around px-6 py-4 pb-8 z-10">
+        <Link href="/moments" className="flex flex-col items-center gap-1">
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M12 21C12 21 3 14 3 8a9 9 0 0118 0c0 6-9 13-9 13z"/></svg>
+          <span className="text-[10px] text-[#888888] tracking-wide">Circle</span>
+        </Link>
         <Link href="/" className="flex flex-col items-center gap-1">
           <svg width="20" height="20" fill="none" stroke="#1a1a1a" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/></svg>
           <span className="text-[10px] text-[#1a1a1a] tracking-wide">Home</span>
